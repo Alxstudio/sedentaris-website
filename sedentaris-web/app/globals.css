@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+:root {
+  --brand: #29ABE2;
+  --brand-dark: #1a9fd4;
+  --brand-light: #e8f6fd;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Barlow', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #29ABE2; border-radius: 3px; }
