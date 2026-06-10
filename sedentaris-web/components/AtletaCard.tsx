@@ -51,6 +51,8 @@ export function useReveal(delay = 0) {
 export default function AtletaCard({ atlete, index = 0 }: { atlete: AtleteData; index?: number }) {
   const ref = useReveal((index % 4) * 80)
 
+  console.log('atlete foto_url:', atlete.foto)
+
   return (
     <div ref={ref}>
       <div className="group bg-white rounded-lg overflow-hidden border border-gray-100 hover:border-[#29ABE2]/30 hover:shadow-lg transition-all duration-300">
@@ -61,7 +63,8 @@ export default function AtletaCard({ atlete, index = 0 }: { atlete: AtleteData; 
             src={atlete.foto}
             alt={atlete.nom}
             fill
-            className="object-cover object-top transition-transform duration-500 ease-out group-hover:scale-110 group-hover:brightness-90"
+            unoptimized
+            className="object-cover object-center transition-transform duration-500 ease-out group-hover:scale-110 group-hover:brightness-90"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
 
