@@ -91,11 +91,12 @@ function AtletesTab() {
       foto_url: form.foto_url || null,
     }
 
-    if (editAtlete) {
-      await supabase.from('atletes').update(payload).eq('id', editAtlete.id)
-    } else {
-      await supabase.from('atletes').insert([payload])
-    }
+    console.log('payload:', payload)
+    const { data, error } = editAtlete
+      ? await supabaseAdmin.from('atletes').update(payload).eq('id', editAtlete.id)
+      : await supabaseAdmin.from('atletes').insert([payload])
+
+    console.log('data:', data, 'error:', error)
 
     setSaving(false)
     setShowForm(false)
@@ -457,7 +458,7 @@ function ContacteTab() {
                   <p className="text-sm text-gray-600 leading-relaxed">{m.missatge}</p>
                   <p className="text-xs text-gray-400 mt-2">{new Date(m.created_at).toLocaleDateString('ca-ES', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
-                <div className="flex flex-col gap-2 flex-shrink-0">
+                <div className="flex flex-col gap-2 shrink-0">
                   <a href={`mailto:${m.email}`}
                     className="px-3 py-1.5 bg-[#29ABE2] text-white text-xs font-bold rounded uppercase tracking-wide hover:bg-[#1a9fd4] transition-colors duration-150 text-center">
                     Respondre
