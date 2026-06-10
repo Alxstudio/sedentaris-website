@@ -21,13 +21,13 @@ export default function NavBar() {
       <div className="relative max-w-7xl mx-auto px-6 h-16 flex items-center">
 
         {/* Logo */}
-        <Link href="/" className="flex-shrink-0">
+        <Link href="/" className="shrink-0">
           <Image
             src="/images/logo-blanco.png"
             alt="Sedentaris.Cat"
             width={220}
             height={60}
-            className="h-14 w-auto"
+            className="h-10 sm:h-14 w-auto"
             priority
           />
         </Link>

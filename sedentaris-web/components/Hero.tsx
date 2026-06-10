@@ -32,7 +32,7 @@ export default function Hero() {
       {/* Title */}
       <div
         ref={titleRef}
-        className="relative z-10 px-4 text-[clamp(2.5rem,10vw,8rem)] font-black text-white tracking-widest text-center leading-none"
+        className="relative z-10 px-4 text-[clamp(2rem,9vw,8rem)] font-black text-white tracking-normal sm:tracking-widest text-center leading-none"
         style={{ fontFamily: "'Anton', sans-serif" }}
       >
         SEDENTARIS<span className="text-[#29ABE2]">.</span>CAT

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase, Atlete, Post } from '@/lib/supabase'
+import { supabase, supabaseAdmin, Atlete, Post } from '@/lib/supabase'
 
 type Tab = 'atletes' | 'posts' | 'contacte'
 
@@ -74,7 +74,7 @@ function AtletesTab() {
     setUploading(true)
     const ext = file.name.split('.').pop()
     const path = `${Date.now()}.${ext}`
-    const { error } = await supabase.storage.from('atletes').upload(path, file)
+    const { error } = await supabaseAdmin.storage.from('atletes').upload(path, file)
     if (!error) {
       const { data } = supabase.storage.from('atletes').getPublicUrl(path)
       setForm((prev) => ({ ...prev, foto_url: data.publicUrl }))
@@ -246,7 +246,7 @@ function PostsTab() {
     setUploading(true)
     const ext = file.name.split('.').pop()
     const path = `${Date.now()}.${ext}`
-    const { error } = await supabase.storage.from('blog').upload(path, file)
+    const { error } = await supabaseAdmin.storage.from('blog').upload(path, file)
     if (!error) {
       const { data } = supabase.storage.from('blog').getPublicUrl(path)
       setForm((prev) => ({ ...prev, imatge_url: data.publicUrl }))

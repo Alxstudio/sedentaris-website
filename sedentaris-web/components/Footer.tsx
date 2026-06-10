@@ -15,7 +15,7 @@ export default function Footer() {
     <footer className="bg-white border-t border-gray-200">
 
       {/* Sponsors */}
-      <div className="max-w-7xl mx-auto px-8 py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-10">
         <p className="text-[10px] font-semibold tracking-[3px] uppercase text-gray-400 mb-5">
           Col·laboradors i Patrocinadors
         </p>
@@ -39,9 +39,9 @@ export default function Footer() {
 
       {/* Bottom */}
       <div className="border-t border-gray-200">
-        <div className="max-w-7xl mx-auto px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
-          <p>© {year} Club d'Atletisme Sedentaris.Cat — Tots els drets reservats</p>
-          <div className="flex items-center gap-5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
+          <p className="w-full sm:w-auto text-center sm:text-left">© {year} Club d'Atletisme Sedentaris.Cat — Tots els drets reservats</p>
+          <div className="w-full sm:w-auto flex flex-wrap justify-center sm:justify-end items-center gap-x-4 gap-y-2">
             <div className="flex items-center gap-1.5">
               <svg width="12" height="12" fill="none" stroke="#29ABE2" strokeWidth="1.5" viewBox="0 0 24 24">
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
@@ -56,7 +56,7 @@ export default function Footer() {
               </svg>
               info@sedentaris.cat
             </div>
-            <div className="flex items-center gap-3 ml-2">
+            <div className="flex items-center gap-3">
               <a href="https://instagram.com/sedentaris.cat" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-[#29ABE2] hover:scale-110 transition-transform duration-200">
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                   <rect x="2" y="2" width="20" height="20" rx="5" />
