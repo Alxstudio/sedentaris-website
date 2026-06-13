@@ -1,15 +1,19 @@
+'use client'
+
 import Image from "next/image"
+import { useT } from '@/lib/i18n'
 
 const sponsors = [
-  { name: "Anec Blau", src: "/patrocinadores/anecblau.webp", padding: "p-2" },
-  { name: "Filsa", src: "/patrocinadores/filsa.webp", padding: "p-2" },
-  { name: "Motor", src: "/patrocinadores/motor.webp", padding: "p-2" },
-  { name: "Seif", src: "/patrocinadores/seif.webp", padding: "p-2" },
-  { name: "Simagol9", src: "/patrocinadores/simagol9.webp", padding: "p-0.5" },
+  { name: "Anec Blau",  src: "/patrocinadores/anecblau.webp",  padding: "p-2" },
+  { name: "Filsa",      src: "/patrocinadores/filsa.webp",      padding: "p-2" },
+  { name: "Motor",      src: "/patrocinadores/motor.webp",      padding: "p-2" },
+  { name: "Seif",       src: "/patrocinadores/seif.webp",       padding: "p-2" },
+  { name: "Simagol9",   src: "/patrocinadores/simagol9.webp",   padding: "p-0.5" },
 ]
 
 export default function Footer() {
   const year = new Date().getFullYear()
+  const t = useT()
 
   return (
     <footer className="bg-white border-t border-gray-200">
@@ -17,14 +21,11 @@ export default function Footer() {
       {/* Sponsors */}
       <div className="max-w-7xl mx-auto px-4 sm:px-8 py-10">
         <p className="text-[10px] font-semibold tracking-[3px] uppercase text-gray-400 mb-5">
-          Col·laboradors i Patrocinadors
+          {t.footer.collaboradors}
         </p>
         <div className="flex flex-wrap items-center gap-4">
           {sponsors.map((sponsor) => (
-            <div
-              key={sponsor.name}
-              className="relative h-14 w-36 overflow-hidden flex items-center justify-center"
-            >
+            <div key={sponsor.name} className="relative h-14 w-36 overflow-hidden flex items-center justify-center">
               <Image
                 src={sponsor.src}
                 alt={sponsor.name}
@@ -40,7 +41,9 @@ export default function Footer() {
       {/* Bottom */}
       <div className="border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
-          <p className="w-full sm:w-auto text-center sm:text-left">© {year} Club d'Atletisme Sedentaris.Cat — Tots els drets reservats</p>
+          <p className="w-full sm:w-auto text-center sm:text-left">
+            © {year} {t.footer.clubName} — {t.footer.rights}
+          </p>
           <div className="w-full sm:w-auto flex flex-wrap justify-center sm:justify-end items-center gap-x-4 gap-y-2">
             <div className="flex items-center gap-1.5">
               <svg width="12" height="12" fill="none" stroke="#29ABE2" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -57,14 +60,14 @@ export default function Footer() {
               info@sedentaris.cat
             </div>
             <div className="flex items-center gap-3">
-              <a href="https://instagram.com/sedentaris.cat" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-[#29ABE2] hover:scale-110 transition-transform duration-200">
+              <a href="https://www.instagram.com/sedentaris.cat/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-[#29ABE2] hover:scale-110 transition-transform duration-200">
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                   <rect x="2" y="2" width="20" height="20" rx="5" />
                   <circle cx="12" cy="12" r="4.5" />
                   <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
                 </svg>
               </a>
-              <a href="https://strava.com/clubs/sedentaris" target="_blank" rel="noopener noreferrer" aria-label="Strava" className="text-[#29ABE2] hover:scale-110 transition-transform duration-200">
+              <a href="https://www.strava.com/clubs/1780176" target="_blank" rel="noopener noreferrer" aria-label="Strava" className="text-[#29ABE2] hover:scale-110 transition-transform duration-200">
                 <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0 3 13.828h4.17" />
                 </svg>

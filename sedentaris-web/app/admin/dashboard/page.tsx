@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase, supabaseAdmin, Atlete, Post } from '@/lib/supabase'
+import ImageCropper from '@/components/ImageCropper'
 
 type Tab = 'atletes' | 'posts' | 'contacte'
 
-// ── Navbar admin ─────────────────────────────────────────────────────
 function AdminNav({ tab, setTab, onLogout }: { tab: Tab; setTab: (t: Tab) => void; onLogout: () => void }) {
   return (
     <header className="bg-[#29ABE2] px-6 h-14 flex items-center justify-between sticky top-0 z-10">
@@ -16,37 +16,28 @@ function AdminNav({ tab, setTab, onLogout }: { tab: Tab; setTab: (t: Tab) => voi
         </span>
         <nav className="flex gap-1">
           {(['atletes', 'posts', 'contacte'] as Tab[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-3 py-1.5 rounded text-xs font-semibold tracking-wide uppercase transition-all duration-150 ${
-                tab === t ? 'bg-white text-[#29ABE2]' : 'text-white/80 hover:text-white hover:bg-white/20'
-              }`}
-            >
+            <button key={t} onClick={() => setTab(t)}
+              className={`px-3 py-1.5 rounded text-xs font-semibold tracking-wide uppercase transition-all duration-150 ${tab === t ? 'bg-white text-[#29ABE2]' : 'text-white/80 hover:text-white hover:bg-white/20'}`}>
               {t}
             </button>
           ))}
         </nav>
       </div>
-      <button
-        onClick={onLogout}
-        className="text-xs font-semibold text-white/70 hover:text-white transition-colors duration-150"
-      >
-        Sortir
-      </button>
+      <button onClick={onLogout} className="text-xs font-semibold text-white/70 hover:text-white transition-colors duration-150">Sortir</button>
     </header>
   )
 }
 
-// ── Atletes tab ──────────────────────────────────────────────────────
 function AtletesTab() {
   const [atletes, setAtletes] = useState<Atlete[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editAtlete, setEditAtlete] = useState<Atlete | null>(null)
-  const [form, setForm] = useState({ nom: '', disciplines: '', instagram: '', foto_url: '' })
+  const [form, setForm] = useState({ nom: '', disciplines: [] as string[], instagram: '', foto_url: '' })
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [cropSrc, setCropSrc] = useState<string | null>(null)
+  const [cropFileName, setCropFileName] = useState<string>('')
 
   const fetchAtletes = async () => {
     const { data } = await supabase.from('atletes').select('*').order('created_at', { ascending: true })
@@ -58,25 +49,32 @@ function AtletesTab() {
 
   const openNew = () => {
     setEditAtlete(null)
-    setForm({ nom: '', disciplines: '', instagram: '', foto_url: '' })
+    setForm({ nom: '', disciplines: [], instagram: '', foto_url: '' })
     setShowForm(true)
   }
 
   const openEdit = (a: Atlete) => {
     setEditAtlete(a)
-    setForm({ nom: a.nom, disciplines: a.disciplines.join(', '), instagram: a.instagram ?? '', foto_url: a.foto_url ?? '' })
+    setForm({ nom: a.nom, disciplines: [...a.disciplines], instagram: a.instagram ?? '', foto_url: a.foto_url ?? '' })
     setShowForm(true)
   }
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    const ext = file.name.split('.').pop() ?? 'jpg'
+    setCropFileName(`${Date.now()}.${ext}`)
+    const reader = new FileReader()
+    reader.onload = () => setCropSrc(reader.result as string)
+    reader.readAsDataURL(file)
+  }
+
+  const handleCropComplete = async (blob: Blob) => {
     setUploading(true)
-    const ext = file.name.split('.').pop()
-    const path = `${Date.now()}.${ext}`
-    const { error } = await supabaseAdmin.storage.from('atletes').upload(path, file)
+    setCropSrc(null)
+    const { error } = await supabaseAdmin.storage.from('atletes').upload(cropFileName, blob)
     if (!error) {
-      const { data } = supabase.storage.from('atletes').getPublicUrl(path)
+      const { data } = supabase.storage.from('atletes').getPublicUrl(cropFileName)
       setForm((prev) => ({ ...prev, foto_url: data.publicUrl }))
     }
     setUploading(false)
@@ -86,18 +84,15 @@ function AtletesTab() {
     setSaving(true)
     const payload = {
       nom: form.nom,
-      disciplines: form.disciplines.split(',').map((d) => d.trim()).filter(Boolean),
+      disciplines: form.disciplines,
       instagram: form.instagram || null,
       foto_url: form.foto_url || null,
     }
-
-    console.log('payload:', payload)
-    const { data, error } = editAtlete
-      ? await supabaseAdmin.from('atletes').update(payload).eq('id', editAtlete.id)
-      : await supabaseAdmin.from('atletes').insert([payload])
-
-    console.log('data:', data, 'error:', error)
-
+    if (editAtlete) {
+      await supabaseAdmin.from('atletes').update(payload).eq('id', editAtlete.id)
+    } else {
+      await supabaseAdmin.from('atletes').insert([payload])
+    }
     setSaving(false)
     setShowForm(false)
     fetchAtletes()
@@ -110,15 +105,19 @@ function AtletesTab() {
   }
 
   return (
+    <>
+      {cropSrc && (
+        <ImageCropper
+          imageSrc={cropSrc}
+          onCropComplete={handleCropComplete}
+          onCancel={() => setCropSrc(null)}
+        />
+      )}
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-black text-gray-900" style={{ fontFamily: "'Anton', sans-serif" }}>ATLETES</h2>
-        <button onClick={openNew} className="px-4 py-2 bg-[#29ABE2] text-white text-xs font-bold tracking-wide uppercase rounded hover:bg-[#1a9fd4] transition-colors duration-150">
-          + Nou atleta
-        </button>
+        <button onClick={openNew} className="px-4 py-2 bg-[#29ABE2] text-white text-xs font-bold tracking-wide uppercase rounded hover:bg-[#1a9fd4] transition-colors duration-150">+ Nou atleta</button>
       </div>
-
-      {/* Form */}
       {showForm && (
         <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
           <h3 className="text-sm font-bold text-gray-900 mb-4">{editAtlete ? 'Editar atleta' : 'Nou atleta'}</h3>
@@ -128,11 +127,30 @@ function AtletesTab() {
               <input value={form.nom} onChange={(e) => setForm((p) => ({ ...p, nom: e.target.value }))}
                 className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15" />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Disciplines (separades per comes) *</label>
-              <input value={form.disciplines} onChange={(e) => setForm((p) => ({ ...p, disciplines: e.target.value }))}
-                placeholder="Trail, Asfalt"
-                className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15" />
+            <div className="flex flex-col gap-1.5 sm:col-span-2">
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Disciplines *</label>
+              <div className="flex flex-wrap gap-2">
+                {(['Trail', 'Asfalt', 'Paraatletisme'] as const).map((d) => {
+                  const active = form.disciplines.includes(d)
+                  return (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setForm((p) => ({
+                        ...p,
+                        disciplines: active ? p.disciplines.filter((x) => x !== d) : [...p.disciplines, d],
+                      }))}
+                      className={`text-xs font-semibold px-4 py-2 rounded-full border transition-all duration-150 ${
+                        active
+                          ? 'bg-[#29ABE2] border-[#29ABE2] text-white'
+                          : 'bg-white border-gray-200 text-gray-500 hover:border-[#29ABE2] hover:text-[#29ABE2]'
+                      }`}
+                    >
+                      {d}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Instagram (opcional)</label>
@@ -160,8 +178,6 @@ function AtletesTab() {
           </div>
         </div>
       )}
-
-      {/* Table */}
       {loading ? (
         <p className="text-sm text-gray-400">Carregant...</p>
       ) : atletes.length === 0 ? (
@@ -204,10 +220,10 @@ function AtletesTab() {
         </div>
       )}
     </div>
+    </>
   )
 }
 
-// ── Posts tab ────────────────────────────────────────────────────────
 function PostsTab() {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
@@ -215,8 +231,10 @@ function PostsTab() {
   const [editPost, setEditPost] = useState<Post | null>(null)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [langTab, setLangTab] = useState<'ca' | 'es'>('ca')
   const [form, setForm] = useState({
     slug: '', titol: '', resum: '', contingut: '',
+    titol_es: '', resum_es: '', contingut_es: '',
     categoria: '', autor: '', imatge_url: '',
     destacat: false, publicat: false,
   })
@@ -231,13 +249,20 @@ function PostsTab() {
 
   const openNew = () => {
     setEditPost(null)
-    setForm({ slug: '', titol: '', resum: '', contingut: '', categoria: '', autor: '', imatge_url: '', destacat: false, publicat: false })
+    setLangTab('ca')
+    setForm({ slug: '', titol: '', resum: '', contingut: '', titol_es: '', resum_es: '', contingut_es: '', categoria: '', autor: '', imatge_url: '', destacat: false, publicat: false })
     setShowForm(true)
   }
 
   const openEdit = (p: Post) => {
     setEditPost(p)
-    setForm({ slug: p.slug, titol: p.titol, resum: p.resum, contingut: p.contingut, categoria: p.categoria, autor: p.autor, imatge_url: p.imatge_url ?? '', destacat: p.destacat, publicat: p.publicat })
+    setLangTab('ca')
+    setForm({
+      slug: p.slug, titol: p.titol, resum: p.resum, contingut: p.contingut,
+      titol_es: p.titol_es ?? '', resum_es: p.resum_es ?? '', contingut_es: p.contingut_es ?? '',
+      categoria: p.categoria, autor: p.autor, imatge_url: p.imatge_url ?? '',
+      destacat: p.destacat, publicat: p.publicat,
+    })
     setShowForm(true)
   }
 
@@ -260,27 +285,32 @@ function PostsTab() {
 
   const handleSave = async () => {
     setSaving(true)
-    const payload = { ...form, imatge_url: form.imatge_url || null }
-
-    if (editPost) {
-      await supabase.from('posts').update(payload).eq('id', editPost.id)
-    } else {
-      await supabase.from('posts').insert([payload])
+    const payload = {
+      slug: form.slug,
+      titol: form.titol, resum: form.resum, contingut: form.contingut,
+      titol_es: form.titol_es || null, resum_es: form.resum_es || null, contingut_es: form.contingut_es || null,
+      categoria: form.categoria, autor: form.autor,
+      imatge_url: form.imatge_url || null,
+      destacat: form.destacat, publicat: form.publicat,
     }
-
+    if (editPost) {
+      await supabaseAdmin.from('posts').update(payload).eq('id', editPost.id)
+    } else {
+      await supabaseAdmin.from('posts').insert([payload])
+    }
     setSaving(false)
     setShowForm(false)
     fetchPosts()
   }
 
   const togglePublicat = async (p: Post) => {
-    await supabase.from('posts').update({ publicat: !p.publicat }).eq('id', p.id)
+    await supabaseAdmin.from('posts').update({ publicat: !p.publicat }).eq('id', p.id)
     fetchPosts()
   }
 
   const handleDelete = async (id: string) => {
     if (!confirm('Segur que vols eliminar aquest post?')) return
-    await supabase.from('posts').delete().eq('id', id)
+    await supabaseAdmin.from('posts').delete().eq('id', id)
     fetchPosts()
   }
 
@@ -288,53 +318,81 @@ function PostsTab() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-black text-gray-900" style={{ fontFamily: "'Anton', sans-serif" }}>POSTS</h2>
-        <button onClick={openNew} className="px-4 py-2 bg-[#29ABE2] text-white text-xs font-bold tracking-wide uppercase rounded hover:bg-[#1a9fd4] transition-colors duration-150">
-          + Nou post
-        </button>
+        <button onClick={openNew} className="px-4 py-2 bg-[#29ABE2] text-white text-xs font-bold tracking-wide uppercase rounded hover:bg-[#1a9fd4] transition-colors duration-150">+ Nou post</button>
       </div>
-
-      {/* Form */}
       {showForm && (
         <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
           <h3 className="text-sm font-bold text-gray-900 mb-4">{editPost ? 'Editar post' : 'Nou post'}</h3>
-          <div className="flex flex-col gap-4">
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Títol *</label>
-                <input value={form.titol}
-                  onChange={(e) => setForm((p) => ({ ...p, titol: e.target.value, slug: generateSlug(e.target.value) }))}
-                  className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15" />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Slug *</label>
-                <input value={form.slug} onChange={(e) => setForm((p) => ({ ...p, slug: e.target.value }))}
-                  className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-500 focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15" />
-              </div>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Categoria *</label>
-                <input value={form.categoria} onChange={(e) => setForm((p) => ({ ...p, categoria: e.target.value }))}
-                  placeholder="Resultats, Notícies, Trail, Asfalt..."
-                  className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15" />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Autor *</label>
-                <input value={form.autor} onChange={(e) => setForm((p) => ({ ...p, autor: e.target.value }))}
-                  className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15" />
-              </div>
+          <div className="grid sm:grid-cols-2 gap-4 mb-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Títol (CA) *</label>
+              <input value={form.titol}
+                onChange={(e) => setForm((p) => ({ ...p, titol: e.target.value, slug: generateSlug(e.target.value) }))}
+                className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15" />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Resum *</label>
-              <textarea value={form.resum} onChange={(e) => setForm((p) => ({ ...p, resum: e.target.value }))}
-                rows={2} className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15 resize-none" />
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Slug *</label>
+              <input value={form.slug} onChange={(e) => setForm((p) => ({ ...p, slug: e.target.value }))}
+                className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-500 focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15" />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Contingut *</label>
-              <textarea value={form.contingut} onChange={(e) => setForm((p) => ({ ...p, contingut: e.target.value }))}
-                rows={8} placeholder="Suporta **text en negreta** i paràgrafs separats per línies buides"
-                className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15 resize-none font-mono" />
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Categoria *</label>
+              <input value={form.categoria} onChange={(e) => setForm((p) => ({ ...p, categoria: e.target.value }))}
+                placeholder="Resultats, Notícies, Trail, Asfalt..."
+                className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15" />
             </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Autor *</label>
+              <input value={form.autor} onChange={(e) => setForm((p) => ({ ...p, autor: e.target.value }))}
+                className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15" />
+            </div>
+          </div>
+          <div className="flex gap-1 mb-4 border-b border-gray-200">
+            <button onClick={() => setLangTab('ca')}
+              className={`px-4 py-2 text-xs font-bold tracking-wide uppercase transition-all duration-150 border-b-2 -mb-px ${langTab === 'ca' ? 'border-[#29ABE2] text-[#29ABE2]' : 'border-transparent text-gray-400 hover:text-gray-600'}`}>
+              🇨🇦 Català
+            </button>
+            <button onClick={() => setLangTab('es')}
+              className={`px-4 py-2 text-xs font-bold tracking-wide uppercase transition-all duration-150 border-b-2 -mb-px ${langTab === 'es' ? 'border-[#29ABE2] text-[#29ABE2]' : 'border-transparent text-gray-400 hover:text-gray-600'}`}>
+              🇪🇸 Castellano
+            </button>
+          </div>
+          {langTab === 'ca' && (
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Resum *</label>
+                <textarea value={form.resum} onChange={(e) => setForm((p) => ({ ...p, resum: e.target.value }))}
+                  rows={2} className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15 resize-none" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Contingut *</label>
+                <textarea value={form.contingut} onChange={(e) => setForm((p) => ({ ...p, contingut: e.target.value }))}
+                  rows={8} placeholder="Suporta **text en negreta** i paràgrafs separats per línies buides"
+                  className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15 resize-none font-mono" />
+              </div>
+            </div>
+          )}
+          {langTab === 'es' && (
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Título ES</label>
+                <input value={form.titol_es} onChange={(e) => setForm((p) => ({ ...p, titol_es: e.target.value }))}
+                  className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Resumen ES</label>
+                <textarea value={form.resum_es} onChange={(e) => setForm((p) => ({ ...p, resum_es: e.target.value }))}
+                  rows={2} className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15 resize-none" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Contenido ES</label>
+                <textarea value={form.contingut_es} onChange={(e) => setForm((p) => ({ ...p, contingut_es: e.target.value }))}
+                  rows={8} placeholder="Soporta **texto en negrita** y párrafos separados por líneas vacías"
+                  className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15 resize-none font-mono" />
+              </div>
+            </div>
+          )}
+          <div className="mt-4 flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Imatge</label>
               <input type="file" accept="image/*" onChange={handleUpload}
@@ -344,13 +402,11 @@ function PostsTab() {
             </div>
             <div className="flex gap-6">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={form.destacat} onChange={(e) => setForm((p) => ({ ...p, destacat: e.target.checked }))}
-                  className="w-4 h-4 accent-[#29ABE2]" />
+                <input type="checkbox" checked={form.destacat} onChange={(e) => setForm((p) => ({ ...p, destacat: e.target.checked }))} className="w-4 h-4 accent-[#29ABE2]" />
                 <span className="text-xs font-semibold text-gray-700">Destacat</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={form.publicat} onChange={(e) => setForm((p) => ({ ...p, publicat: e.target.checked }))}
-                  className="w-4 h-4 accent-[#29ABE2]" />
+                <input type="checkbox" checked={form.publicat} onChange={(e) => setForm((p) => ({ ...p, publicat: e.target.checked }))} className="w-4 h-4 accent-[#29ABE2]" />
                 <span className="text-xs font-semibold text-gray-700">Publicar ara</span>
               </label>
             </div>
@@ -367,8 +423,6 @@ function PostsTab() {
           </div>
         </div>
       )}
-
-      {/* Table */}
       {loading ? (
         <p className="text-sm text-gray-400">Carregant...</p>
       ) : posts.length === 0 ? (
@@ -381,6 +435,7 @@ function PostsTab() {
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Títol</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Categoria</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Autor</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">ES</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Estat</th>
                 <th className="px-4 py-3" />
               </tr>
@@ -395,10 +450,13 @@ function PostsTab() {
                   <td className="px-4 py-3 text-sm text-gray-500">{p.categoria}</td>
                   <td className="px-4 py-3 text-sm text-gray-500">{p.autor}</td>
                   <td className="px-4 py-3">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${p.titol_es ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}`}>
+                      {p.titol_es ? '✓' : '—'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
                     <button onClick={() => togglePublicat(p)}
-                      className={`text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wide transition-colors duration-150 ${
-                        p.publicat ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                      }`}>
+                      className={`text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wide transition-colors duration-150 ${p.publicat ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
                       {p.publicat ? 'Publicat' : 'Esborrany'}
                     </button>
                   </td>
@@ -418,7 +476,6 @@ function PostsTab() {
   )
 }
 
-// ── Contacte tab ─────────────────────────────────────────────────────
 function ContacteTab() {
   const [missatges, setMissatges] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -477,7 +534,6 @@ function ContacteTab() {
   )
 }
 
-// ── Main ─────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
   const router = useRouter()
   const [tab, setTab] = useState<Tab>('atletes')

@@ -3,8 +3,8 @@
 import { useRef, useEffect, useState } from 'react'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
+import { useT } from '@/lib/i18n'
 
-// ── Reveal hook ──────────────────────────────────────────────────────
 function useReveal(delay = 0) {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -32,24 +32,11 @@ function useReveal(delay = 0) {
   return ref
 }
 
-// ── Form state ───────────────────────────────────────────────────────
 type FormStatus = 'idle' | 'sending' | 'success' | 'error'
 
-// ── Input component ──────────────────────────────────────────────────
-function Input({
-  label,
-  name,
-  type = 'text',
-  required = false,
-  value,
-  onChange,
-}: {
-  label: string
-  name: string
-  type?: string
-  required?: boolean
-  value: string
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+function Input({ label, name, type = 'text', required = false, value, onChange }: {
+  label: string; name: string; type?: string; required?: boolean
+  value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
 }) {
   return (
     <div className="flex flex-col gap-1.5">
@@ -57,49 +44,20 @@ function Input({
         {label} {required && <span className="text-[#29ABE2]">*</span>}
       </label>
       <input
-        id={name}
-        name={name}
-        type={type}
-        required={required}
-        value={value}
-        onChange={onChange}
+        id={name} name={name} type={type} required={required} value={value} onChange={onChange}
         className="px-4 py-3 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15 transition-all duration-150"
       />
     </div>
   )
 }
 
-// ── Page banner ──────────────────────────────────────────────────────
-function PageBanner() {
-  const ref = useReveal()
-  return (
-    <section className="pt-16 bg-[#29ABE2]">
-      <div ref={ref} className="max-w-7xl mx-auto px-8 py-10">
-        <span className="text-[11px] font-semibold tracking-[3px] uppercase text-white/60 mb-4 block">
-          Parla amb nosaltres
-        </span>
-        <h1
-          className="text-6xl sm:text-7xl md:text-8xl font-black text-white leading-none"
-          style={{ fontFamily: "'Anton', sans-serif" }}
-        >
-          CONTACTE
-        </h1>
-      </div>
-    </section>
-  )
-}
-
-// ── Main ─────────────────────────────────────────────────────────────
 export default function ContactePage() {
   const formRef = useReveal(100)
   const infoRef = useReveal(200)
+  const t = useT()
+  const tr = t.contacte
 
-  const [form, setForm] = useState({
-    nom: '',
-    email: '',
-    assumpte: '',
-    missatge: '',
-  })
+  const [form, setForm] = useState({ nom: '', email: '', assumpte: '', missatge: '' })
   const [status, setStatus] = useState<FormStatus>('idle')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -109,14 +67,12 @@ export default function ContactePage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setStatus('sending')
-
     try {
       const res = await fetch('/api/contacte', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       })
-
       if (!res.ok) throw new Error('Error enviant')
       setStatus('success')
     } catch {
@@ -127,21 +83,24 @@ export default function ContactePage() {
   return (
     <>
       <NavBar />
-      <PageBanner />
+
+      <section className="pt-16 bg-[#29ABE2]">
+        <div className="max-w-7xl mx-auto px-8 py-10">
+          <span className="text-[11px] font-semibold tracking-[3px] uppercase text-white/60 mb-4 block">{tr.bannerSub}</span>
+          <h1 className="text-6xl sm:text-7xl md:text-8xl font-black text-white leading-none" style={{ fontFamily: "'Anton', sans-serif" }}>
+            {tr.bannerTitle}
+          </h1>
+        </div>
+      </section>
 
       <section className="max-w-6xl mx-auto px-8 py-16">
         <div className="grid md:grid-cols-3 gap-12">
 
-          {/* ── Form ── */}
+          {/* Form */}
           <div ref={formRef} className="md:col-span-2">
-            <span className="text-[11px] font-semibold tracking-[3px] uppercase text-[#29ABE2] block mb-2">
-              Formulari
-            </span>
-            <h2
-              className="text-4xl font-black text-gray-900 mb-8"
-              style={{ fontFamily: "'Anton', sans-serif" }}
-            >
-              ENVIA'NS UN MISSATGE
+            <span className="text-[11px] font-semibold tracking-[3px] uppercase text-[#29ABE2] block mb-2">{tr.formSub}</span>
+            <h2 className="text-4xl font-black text-gray-900 mb-8" style={{ fontFamily: "'Anton', sans-serif" }}>
+              {tr.formTitle}
             </h2>
 
             {status === 'success' ? (
@@ -151,49 +110,35 @@ export default function ContactePage() {
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-black text-gray-900" style={{ fontFamily: "'Anton', sans-serif" }}>
-                  MISSATGE ENVIAT
-                </h3>
-                <p className="text-sm text-gray-500 max-w-xs">
-                  Hem rebut el teu missatge. Et respondrem el més aviat possible.
-                </p>
+                <h3 className="text-xl font-black text-gray-900" style={{ fontFamily: "'Anton', sans-serif" }}>{tr.successTitle}</h3>
+                <p className="text-sm text-gray-500 max-w-xs">{tr.successText}</p>
                 <button
                   onClick={() => { setStatus('idle'); setForm({ nom: '', email: '', assumpte: '', missatge: '' }) }}
                   className="mt-2 text-xs font-semibold text-[#29ABE2] hover:underline"
                 >
-                  Enviar un altre missatge
+                  {tr.successBtn}
                 </button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                 <div className="grid sm:grid-cols-2 gap-5">
-                  <Input label="Nom" name="nom" required value={form.nom} onChange={handleChange} />
-                  <Input label="Email" name="email" type="email" required value={form.email} onChange={handleChange} />
+                  <Input label={tr.labelNom}   name="nom"   required value={form.nom}   onChange={handleChange} />
+                  <Input label={tr.labelEmail}  name="email" type="email" required value={form.email}  onChange={handleChange} />
                 </div>
-
-                {/* Assumpte */}
-                <Input label="Assumpte" name="assumpte" required value={form.assumpte} onChange={handleChange} />
-
-                {/* Missatge */}
+                <Input label={tr.labelAssumpte} name="assumpte" required value={form.assumpte} onChange={handleChange} />
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="missatge" className="text-xs font-semibold text-gray-700 tracking-wide uppercase">
-                    Missatge <span className="text-[#29ABE2]">*</span>
+                    {tr.labelMissatge} <span className="text-[#29ABE2]">*</span>
                   </label>
                   <textarea
-                    id="missatge"
-                    name="missatge"
-                    required
-                    rows={5}
-                    value={form.missatge}
-                    onChange={handleChange}
-                    placeholder="Escriu el teu missatge aquí..."
+                    id="missatge" name="missatge" required rows={5}
+                    value={form.missatge} onChange={handleChange}
+                    placeholder={tr.placeholderMissatge}
                     className="px-4 py-3 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15 transition-all duration-150 resize-none"
                   />
                 </div>
-
                 <button
-                  type="submit"
-                  disabled={status === 'sending'}
+                  type="submit" disabled={status === 'sending'}
                   className="self-start px-8 py-3.5 bg-[#29ABE2] text-white text-sm font-bold tracking-wide uppercase rounded-lg hover:bg-[#1a9fd4] disabled:opacity-60 transition-all duration-150 flex items-center gap-2"
                 >
                   {status === 'sending' ? (
@@ -201,25 +146,17 @@ export default function ContactePage() {
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="animate-spin">
                         <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
                       </svg>
-                      Enviant...
+                      {tr.btnSending}
                     </>
-                  ) : (
-                    'Enviar missatge'
-                  )}
+                  ) : tr.btnSend}
                 </button>
-
-                {status === 'error' && (
-                  <p className="text-sm text-red-500 mt-2">
-                    Hi ha hagut un error. Torna-ho a intentar o escriu-nos directament.
-                  </p>
-                )}
+                {status === 'error' && <p className="text-sm text-red-500 mt-2">{tr.errorText}</p>}
               </form>
             )}
           </div>
 
-          {/* ── Info sidebar ── */}
+          {/* Info sidebar */}
           <div ref={infoRef} className="flex flex-col">
-            {/* Contact items */}
             <div className="flex flex-col gap-2 mt-30">
               <div className="flex items-start gap-3 p-4 rounded-xl bg-gray-50 border border-gray-100">
                 <div className="w-9 h-9 rounded-lg bg-[#29ABE2]/10 flex items-center justify-center shrink-0">
@@ -229,8 +166,8 @@ export default function ContactePage() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-900 mb-0.5">Ubicació</p>
-                  <p className="text-base text-gray-500 leading-relaxed">Castelldefels, Barcelona</p>
+                  <p className="text-sm font-semibold text-gray-900 mb-0.5">{tr.ubicacioLabel}</p>
+                  <p className="text-base text-gray-500 leading-relaxed">{tr.ubicacioValue}</p>
                 </div>
               </div>
 
@@ -243,9 +180,7 @@ export default function ContactePage() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-900 mb-0.5">Email</p>
-                  <a href="mailto:info@sedentaris.cat" className="text-base text-[#29ABE2] hover:underline">
-                    info@sedentaris.cat
-                  </a>
+                  <a href="mailto:info@sedentaris.cat" className="text-base text-[#29ABE2] hover:underline">info@sedentaris.cat</a>
                 </div>
               </div>
 
@@ -259,18 +194,12 @@ export default function ContactePage() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-900 mb-0.5">Instagram</p>
-                  <a
-                    href="https://instagram.com/sedentaris.cat"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-base text-[#29ABE2] hover:underline"
-                  >
+                  <a href="https://www.instagram.com/sedentaris.cat/" target="_blank" rel="noopener noreferrer" className="text-base text-[#29ABE2] hover:underline">
                     @sedentaris.cat
                   </a>
                 </div>
               </div>
             </div>
-
           </div>
 
         </div>

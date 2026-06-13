@@ -28,6 +28,9 @@ export interface Post {
   titol: string
   resum: string
   contingut: string
+  titol_es: string | null
+  resum_es: string | null
+  contingut_es: string | null
   categoria: string
   autor: string
   imatge_url: string | null
