@@ -9,6 +9,8 @@ const sponsors = [
   { name: "Motor",      src: "/patrocinadores/motor.webp",      padding: "p-2" },
   { name: "Seif",       src: "/patrocinadores/seif.webp",       padding: "p-2" },
   { name: "Simagol9",   src: "/patrocinadores/simagol9.webp",   padding: "p-0.5" },
+  { name: "Anguila",    src: "/patrocinadores/anguila.webp",    padding: "p-2" },
+  { name: "Estate",     src: "/patrocinadores/estate.webp",     padding: "p-2" },
 ]
 
 export default function Footer() {
