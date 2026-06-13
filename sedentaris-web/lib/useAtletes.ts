@@ -10,10 +10,21 @@ export function useAtletes() {
 
   useEffect(() => {
     async function fetchAtletes() {
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('atletes')
         .select('*')
+        .order('ordre', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: true })
+
+      if (error) {
+        // ordre column doesn't exist yet — fall back to created_at
+        const fallback = await supabase
+          .from('atletes')
+          .select('*')
+          .order('created_at', { ascending: true })
+        data = fallback.data
+        error = fallback.error
+      }
 
       if (error) {
         setError(error.message)

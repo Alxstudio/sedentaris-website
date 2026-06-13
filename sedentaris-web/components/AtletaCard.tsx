@@ -79,8 +79,8 @@ export default function AtletaCard({ atlete, index = 0 }: { atlete: AtleteData; 
         </div>
 
         {/* Info — altura fija para que todas las cards sean iguales */}
-        <div className="h-14 px-4 flex items-center justify-between gap-2">
-          <p className="text-sm font-semibold text-gray-900 leading-tight truncate">{atlete.nom}</p>
+        <div className="px-4 py-3 md:py-0 md:h-14 flex items-center justify-between gap-2">
+          <p className="text-sm font-semibold text-gray-900 leading-tight md:truncate">{atlete.nom}</p>
 
           <div className="w-8 h-8 shrink-0">
             {atlete.instagram && (

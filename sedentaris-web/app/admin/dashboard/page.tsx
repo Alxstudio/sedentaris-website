@@ -4,6 +4,21 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase, supabaseAdmin, Atlete, Post } from '@/lib/supabase'
 import ImageCropper from '@/components/ImageCropper'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 type Tab = 'atletes' | 'posts' | 'contacte'
 
@@ -28,6 +43,72 @@ function AdminNav({ tab, setTab, onLogout }: { tab: Tab; setTab: (t: Tab) => voi
   )
 }
 
+function GripIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+      <circle cx="4" cy="3" r="1.2" />
+      <circle cx="10" cy="3" r="1.2" />
+      <circle cx="4" cy="7" r="1.2" />
+      <circle cx="10" cy="7" r="1.2" />
+      <circle cx="4" cy="11" r="1.2" />
+      <circle cx="10" cy="11" r="1.2" />
+    </svg>
+  )
+}
+
+function SortableAtleteRow({
+  atlete,
+  onEdit,
+  onDelete,
+}: {
+  atlete: Atlete
+  onEdit: (a: Atlete) => void
+  onDelete: (id: string) => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: atlete.id })
+
+  return (
+    <tr
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.45 : 1,
+        zIndex: isDragging ? 10 : 'auto',
+        position: 'relative',
+      }}
+      className={`transition-colors duration-100 ${isDragging ? 'bg-[#29ABE2]/5 shadow-lg' : 'hover:bg-gray-50'}`}
+    >
+      <td className="pl-3 pr-1 py-3">
+        <button
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-[#29ABE2] p-1 rounded touch-none transition-colors duration-150"
+          title="Arrossega per ordenar"
+        >
+          <GripIcon />
+        </button>
+      </td>
+      <td className="px-4 py-3 text-sm font-semibold text-gray-900">{atlete.nom}</td>
+      <td className="px-4 py-3">
+        <div className="flex flex-wrap gap-1">
+          {atlete.disciplines.map((d) => (
+            <span key={d} className="text-[10px] font-semibold px-2 py-0.5 rounded bg-[#29ABE2]/10 text-[#29ABE2]">{d}</span>
+          ))}
+        </div>
+      </td>
+      <td className="px-4 py-3 text-sm text-gray-500">{atlete.instagram ?? '—'}</td>
+      <td className="px-4 py-3 text-sm text-gray-500">{atlete.foto_url ? '✓' : '—'}</td>
+      <td className="px-4 py-3">
+        <div className="flex gap-2 justify-end">
+          <button onClick={() => onEdit(atlete)} className="text-xs font-semibold text-[#29ABE2] hover:underline">Editar</button>
+          <button onClick={() => onDelete(atlete.id)} className="text-xs font-semibold text-red-500 hover:underline">Eliminar</button>
+        </div>
+      </td>
+    </tr>
+  )
+}
+
 function AtletesTab() {
   const [atletes, setAtletes] = useState<Atlete[]>([])
   const [loading, setLoading] = useState(true)
@@ -35,17 +116,56 @@ function AtletesTab() {
   const [editAtlete, setEditAtlete] = useState<Atlete | null>(null)
   const [form, setForm] = useState({ nom: '', disciplines: [] as string[], instagram: '', foto_url: '' })
   const [saving, setSaving] = useState(false)
+  const [savingOrder, setSavingOrder] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [cropSrc, setCropSrc] = useState<string | null>(null)
   const [cropFileName, setCropFileName] = useState<string>('')
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+  )
+
   const fetchAtletes = async () => {
-    const { data } = await supabase.from('atletes').select('*').order('created_at', { ascending: true })
+    let { data, error } = await supabase
+      .from('atletes')
+      .select('*')
+      .order('ordre', { ascending: true, nullsFirst: false })
+      .order('created_at', { ascending: true })
+
+    if (error) {
+      // ordre column doesn't exist yet — fall back to created_at
+      const fallback = await supabase
+        .from('atletes')
+        .select('*')
+        .order('created_at', { ascending: true })
+      data = fallback.data
+    }
+
     setAtletes(data ?? [])
     setLoading(false)
   }
 
   useEffect(() => { fetchAtletes() }, [])
+
+  const saveOrder = async (ordered: Atlete[]) => {
+    setSavingOrder(true)
+    await Promise.all(
+      ordered.map((a, i) =>
+        supabaseAdmin.from('atletes').update({ ordre: i }).eq('id', a.id)
+      )
+    )
+    setSavingOrder(false)
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIndex = atletes.findIndex((a) => a.id === active.id)
+    const newIndex = atletes.findIndex((a) => a.id === over.id)
+    const reordered = arrayMove(atletes, oldIndex, newIndex)
+    setAtletes(reordered)
+    saveOrder(reordered)
+  }
 
   const openNew = () => {
     setEditAtlete(null)
@@ -113,113 +233,113 @@ function AtletesTab() {
           onCancel={() => setCropSrc(null)}
         />
       )}
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-black text-gray-900" style={{ fontFamily: "'Anton', sans-serif" }}>ATLETES</h2>
-        <button onClick={openNew} className="px-4 py-2 bg-[#29ABE2] text-white text-xs font-bold tracking-wide uppercase rounded hover:bg-[#1a9fd4] transition-colors duration-150">+ Nou atleta</button>
-      </div>
-      {showForm && (
-        <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
-          <h3 className="text-sm font-bold text-gray-900 mb-4">{editAtlete ? 'Editar atleta' : 'Nou atleta'}</h3>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Nom *</label>
-              <input value={form.nom} onChange={(e) => setForm((p) => ({ ...p, nom: e.target.value }))}
-                className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15" />
-            </div>
-            <div className="flex flex-col gap-1.5 sm:col-span-2">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Disciplines *</label>
-              <div className="flex flex-wrap gap-2">
-                {(['Trail', 'Asfalt', 'Paraatletisme'] as const).map((d) => {
-                  const active = form.disciplines.includes(d)
-                  return (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setForm((p) => ({
-                        ...p,
-                        disciplines: active ? p.disciplines.filter((x) => x !== d) : [...p.disciplines, d],
-                      }))}
-                      className={`text-xs font-semibold px-4 py-2 rounded-full border transition-all duration-150 ${
-                        active
-                          ? 'bg-[#29ABE2] border-[#29ABE2] text-white'
-                          : 'bg-white border-gray-200 text-gray-500 hover:border-[#29ABE2] hover:text-[#29ABE2]'
-                      }`}
-                    >
-                      {d}
-                    </button>
-                  )
-                })}
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-black text-gray-900" style={{ fontFamily: "'Anton', sans-serif" }}>ATLETES</h2>
+            {savingOrder && (
+              <span className="text-xs text-[#29ABE2] font-semibold animate-pulse">Guardant ordre...</span>
+            )}
+          </div>
+          <button onClick={openNew} className="px-4 py-2 bg-[#29ABE2] text-white text-xs font-bold tracking-wide uppercase rounded hover:bg-[#1a9fd4] transition-colors duration-150">+ Nou atleta</button>
+        </div>
+        {showForm && (
+          <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
+            <h3 className="text-sm font-bold text-gray-900 mb-4">{editAtlete ? 'Editar atleta' : 'Nou atleta'}</h3>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Nom *</label>
+                <input value={form.nom} onChange={(e) => setForm((p) => ({ ...p, nom: e.target.value }))}
+                  className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15" />
+              </div>
+              <div className="flex flex-col gap-1.5 sm:col-span-2">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Disciplines *</label>
+                <div className="flex flex-wrap gap-2">
+                  {(['Trail', 'Asfalt', 'Paraatletisme'] as const).map((d) => {
+                    const active = form.disciplines.includes(d)
+                    return (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => setForm((p) => ({
+                          ...p,
+                          disciplines: active ? p.disciplines.filter((x) => x !== d) : [...p.disciplines, d],
+                        }))}
+                        className={`text-xs font-semibold px-4 py-2 rounded-full border transition-all duration-150 ${
+                          active
+                            ? 'bg-[#29ABE2] border-[#29ABE2] text-white'
+                            : 'bg-white border-gray-200 text-gray-500 hover:border-[#29ABE2] hover:text-[#29ABE2]'
+                        }`}
+                      >
+                        {d}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Instagram (opcional)</label>
+                <input value={form.instagram} onChange={(e) => setForm((p) => ({ ...p, instagram: e.target.value }))}
+                  placeholder="usuari sense @"
+                  className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Foto</label>
+                <input type="file" accept="image/*" onChange={handleUpload}
+                  className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-500 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#29ABE2]/10 file:text-[#29ABE2]" />
+                {uploading && <p className="text-xs text-[#29ABE2]">Pujant foto...</p>}
+                {form.foto_url && <p className="text-xs text-green-600">✓ Foto pujada</p>}
               </div>
             </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Instagram (opcional)</label>
-              <input value={form.instagram} onChange={(e) => setForm((p) => ({ ...p, instagram: e.target.value }))}
-                placeholder="usuari sense @"
-                className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#29ABE2] focus:ring-2 focus:ring-[#29ABE2]/15" />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Foto</label>
-              <input type="file" accept="image/*" onChange={handleUpload}
-                className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-500 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#29ABE2]/10 file:text-[#29ABE2]" />
-              {uploading && <p className="text-xs text-[#29ABE2]">Pujant foto...</p>}
-              {form.foto_url && <p className="text-xs text-green-600">✓ Foto pujada</p>}
+            <div className="flex gap-3 mt-5">
+              <button onClick={handleSave} disabled={saving || !form.nom}
+                className="px-5 py-2.5 bg-[#29ABE2] text-white text-xs font-bold tracking-wide uppercase rounded hover:bg-[#1a9fd4] disabled:opacity-50 transition-colors duration-150">
+                {saving ? 'Guardant...' : 'Guardar'}
+              </button>
+              <button onClick={() => setShowForm(false)}
+                className="px-5 py-2.5 border border-gray-200 text-gray-600 text-xs font-bold tracking-wide uppercase rounded hover:border-gray-400 transition-colors duration-150">
+                Cancel·lar
+              </button>
             </div>
           </div>
-          <div className="flex gap-3 mt-5">
-            <button onClick={handleSave} disabled={saving || !form.nom}
-              className="px-5 py-2.5 bg-[#29ABE2] text-white text-xs font-bold tracking-wide uppercase rounded hover:bg-[#1a9fd4] disabled:opacity-50 transition-colors duration-150">
-              {saving ? 'Guardant...' : 'Guardar'}
-            </button>
-            <button onClick={() => setShowForm(false)}
-              className="px-5 py-2.5 border border-gray-200 text-gray-600 text-xs font-bold tracking-wide uppercase rounded hover:border-gray-400 transition-colors duration-150">
-              Cancel·lar
-            </button>
-          </div>
-        </div>
-      )}
-      {loading ? (
-        <p className="text-sm text-gray-400">Carregant...</p>
-      ) : atletes.length === 0 ? (
-        <p className="text-sm text-gray-400">No hi ha atletes. Afegeix-ne un!</p>
-      ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Nom</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Disciplines</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Instagram</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Foto</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {atletes.map((a) => (
-                <tr key={a.id} className="hover:bg-gray-50 transition-colors duration-100">
-                  <td className="px-4 py-3 text-sm font-semibold text-gray-900">{a.nom}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1">
-                      {a.disciplines.map((d) => (
-                        <span key={d} className="text-[10px] font-semibold px-2 py-0.5 rounded bg-[#29ABE2]/10 text-[#29ABE2]">{d}</span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">{a.instagram ?? '—'}</td>
-                  <td className="px-4 py-3 text-sm text-gray-500">{a.foto_url ? '✓' : '—'}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2 justify-end">
-                      <button onClick={() => openEdit(a)} className="text-xs font-semibold text-[#29ABE2] hover:underline">Editar</button>
-                      <button onClick={() => handleDelete(a.id)} className="text-xs font-semibold text-red-500 hover:underline">Eliminar</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+        )}
+        {loading ? (
+          <p className="text-sm text-gray-400">Carregant...</p>
+        ) : atletes.length === 0 ? (
+          <p className="text-sm text-gray-400">No hi ha atletes. Afegeix-ne un!</p>
+        ) : (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={atletes.map((a) => a.id)} strategy={verticalListSortingStrategy}>
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="w-10 pl-3 pr-1 py-3" title="Arrossega per ordenar">
+                        <GripIcon />
+                      </th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Nom</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Disciplines</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Instagram</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Foto</th>
+                      <th className="px-4 py-3" />
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {atletes.map((a) => (
+                      <SortableAtleteRow
+                        key={a.id}
+                        atlete={a}
+                        onEdit={openEdit}
+                        onDelete={handleDelete}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
+      </div>
     </>
   )
 }
@@ -281,7 +401,7 @@ function PostsTab() {
   }
 
   const generateSlug = (titol: string) =>
-    titol.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').trim()
+    titol.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').trim()
 
   const handleSave = async () => {
     setSaving(true)

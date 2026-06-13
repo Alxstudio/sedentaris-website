@@ -19,6 +19,7 @@ export interface Atlete {
   disciplines: string[]
   instagram: string | null
   foto_url: string | null
+  ordre: number | null
   created_at: string
 }
 
