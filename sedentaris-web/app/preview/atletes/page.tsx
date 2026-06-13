@@ -30,7 +30,7 @@ function PageBanner() {
   )
 }
 
-export default function AtletesPage() {
+export default function AtletesPreviewPage() {
   const { atletes, loading, error } = useAtletes()
   const t = useT()
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set())
@@ -50,7 +50,7 @@ export default function AtletesPage() {
 
   return (
     <>
-      <NavBar />
+      <NavBar previewMode />
       <PageBanner />
 
       <section className="max-w-7xl mx-auto px-4 sm:px-8 py-10 sm:py-16">

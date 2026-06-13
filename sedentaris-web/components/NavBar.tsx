@@ -30,7 +30,7 @@ function LangSwitcher({ className = '' }: { className?: string }) {
   )
 }
 
-export default function NavBar() {
+export default function NavBar({ previewMode = false }: { previewMode?: boolean }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const pathname = usePathname()
   const isEs = pathname.startsWith('/es')
@@ -38,12 +38,12 @@ export default function NavBar() {
   const t = useT()
 
   const navLinks = [
-    { href: '/el-club',  label: t.nav.elClub },
-    { href: '/atletes',  label: t.nav.atletes },
-    { href: '/blog',     label: t.nav.blog },
-    { href: '/tarifes',  label: t.nav.tarifes },
-    { href: '/roba',     label: t.nav.roba },
-    { href: '/contacte', label: t.nav.contacte },
+    { href: '/el-club',  label: t.nav.elClub,   preview: false },
+    { href: '/atletes',  label: t.nav.atletes,   preview: true  },
+    { href: '/blog',     label: t.nav.blog,      preview: false },
+    { href: '/tarifes',  label: t.nav.tarifes,   preview: false },
+    { href: '/roba',     label: t.nav.roba,      preview: false },
+    { href: '/contacte', label: t.nav.contacte,  preview: false },
   ]
 
   return (
@@ -51,7 +51,7 @@ export default function NavBar() {
       <div className="relative max-w-7xl mx-auto px-6 h-16 flex items-center">
 
         {/* Logo */}
-        <Link href={prefix || '/'} className="shrink-0">
+        <Link href={previewMode ? '/preview/atletes' : (prefix || '/')} className="shrink-0">
           <Image
             src="/images/logo-blanco.png"
             alt="Sedentaris.Cat"
@@ -64,20 +64,35 @@ export default function NavBar() {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-4 absolute left-1/2 -translate-x-1/2">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={`${prefix}${link.href}`}
-              className="px-4 py-2 text-base font-medium whitespace-nowrap text-white/85 hover:text-white hover:scale-110 transition-all duration-200 inline-block"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const blocked = previewMode && !link.preview
+            return blocked ? (
+              <span
+                key={link.href}
+                className="px-4 py-2 text-base font-medium whitespace-nowrap text-white/30 cursor-not-allowed flex items-center gap-1.5 select-none"
+                title="Secció no disponible en previsualització"
+              >
+                {link.label}
+                <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="opacity-60">
+                  <rect x="3" y="11" width="18" height="11" rx="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+              </span>
+            ) : (
+              <Link
+                key={link.href}
+                href={previewMode ? '/preview/atletes' : `${prefix}${link.href}`}
+                className="px-4 py-2 text-base font-medium whitespace-nowrap text-white/85 hover:text-white hover:scale-110 transition-all duration-200 inline-block"
+              >
+                {link.label}
+              </Link>
+            )
+          })}
         </nav>
 
         {/* Right: lang switcher + hamburger */}
         <div className="ml-auto flex items-center gap-3">
-          <LangSwitcher className="hidden md:flex" />
+          {!previewMode && <LangSwitcher className="hidden md:flex" />}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="md:hidden flex flex-col gap-1.5 p-2 text-white"
@@ -93,19 +108,35 @@ export default function NavBar() {
       {/* Mobile menu */}
       <div className={`md:hidden bg-[#1a8bbf]/90 border-t border-white/20 transition-all duration-300 overflow-hidden ${menuOpen ? 'max-h-96' : 'max-h-0'}`}>
         <nav className="px-6 py-3 flex flex-col gap-1">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={`${prefix}${link.href}`}
-              onClick={() => setMenuOpen(false)}
-              className="px-4 py-3 rounded text-white font-medium hover:bg-white/20 transition-all duration-150"
-            >
-              {link.label}
-            </Link>
-          ))}
-          <div className="px-4 pt-2 pb-1 border-t border-white/20 mt-1">
-            <LangSwitcher />
-          </div>
+          {navLinks.map((link) => {
+            const blocked = previewMode && !link.preview
+            return blocked ? (
+              <span
+                key={link.href}
+                className="px-4 py-3 rounded text-white/30 font-medium flex items-center justify-between cursor-not-allowed select-none"
+              >
+                {link.label}
+                <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="opacity-60">
+                  <rect x="3" y="11" width="18" height="11" rx="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+              </span>
+            ) : (
+              <Link
+                key={link.href}
+                href={previewMode ? '/preview/atletes' : `${prefix}${link.href}`}
+                onClick={() => setMenuOpen(false)}
+                className="px-4 py-3 rounded text-white font-medium hover:bg-white/20 transition-all duration-150"
+              >
+                {link.label}
+              </Link>
+            )
+          })}
+          {!previewMode && (
+            <div className="px-4 pt-2 pb-1 border-t border-white/20 mt-1">
+              <LangSwitcher />
+            </div>
+          )}
         </nav>
       </div>
     </header>
