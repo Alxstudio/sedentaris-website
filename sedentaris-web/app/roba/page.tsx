@@ -63,15 +63,15 @@ export default function RobaPage() {
       <NavBar />
 
       <section className="pt-16 bg-[#29ABE2]">
-        <div className="max-w-7xl mx-auto px-8 py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-10">
           <span className="text-[11px] font-semibold tracking-[3px] uppercase text-white/60 mb-4 block">{tr.bannerSub}</span>
-          <h1 className="text-6xl sm:text-7xl md:text-8xl font-black text-white leading-none" style={{ fontFamily: "'Anton', sans-serif" }}>
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-white leading-none" style={{ fontFamily: "'Anton', sans-serif" }}>
             {tr.bannerTitle}
           </h1>
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-8 py-16">
+      <section className="max-w-7xl mx-auto px-4 sm:px-8 py-10 sm:py-16">
 
         <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
           <div>
@@ -101,13 +101,13 @@ export default function RobaPage() {
           })}
         </div>
 
-        <div className="mt-12 p-6 rounded-xl bg-[#29ABE2]/6 border border-[#29ABE2]/20 flex items-start gap-4">
+        <div className="mt-8 sm:mt-12 p-4 sm:p-6 rounded-xl bg-[#29ABE2]/6 border border-[#29ABE2]/20 flex items-start gap-4">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#29ABE2" strokeWidth="1.5" className="flex-shrink-0 mt-0.5">
             <circle cx="12" cy="12" r="10" />
             <line x1="12" y1="8" x2="12" y2="12" />
             <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
-          <p className="text-lg text-gray-600 leading-relaxed">{tr.noteText}</p>
+          <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{tr.noteText}</p>
         </div>
 
       </section>

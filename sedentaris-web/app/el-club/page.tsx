@@ -57,7 +57,7 @@ function StoryBlock({ tag, title, text, image, reverse }: {
         <Image src={image} alt={title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
         <div className="absolute inset-0 bg-gradient-to-br from-[#29ABE2]/20 to-[#29ABE2]/5" />
       </div>
-      <div className="w-full md:w-1/2 flex items-center px-10 py-14 md:px-16 md:py-20">
+      <div className="w-full md:w-1/2 flex items-center px-6 py-8 sm:px-10 sm:py-14 md:px-16 md:py-20">
         <div className="max-w-xl">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-6 h-0.5 bg-[#29ABE2]" />
@@ -76,8 +76,8 @@ function StoryBlock({ tag, title, text, image, reverse }: {
 function SectionHeader({ title }: { title: string }) {
   const ref = useReveal()
   return (
-    <div ref={ref} className="text-center py-20 px-6">
-      <h2 className="text-5xl md:text-6xl font-black text-gray-900" style={{ fontFamily: "'Anton', sans-serif" }}>{title}</h2>
+    <div ref={ref} className="text-center py-10 sm:py-16 md:py-20 px-4 sm:px-6">
+      <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-gray-900" style={{ fontFamily: "'Anton', sans-serif" }}>{title}</h2>
       <div className="w-12 h-1 bg-[#29ABE2] rounded mx-auto mt-5" />
     </div>
   )
@@ -101,9 +101,9 @@ export default function ElClubPage() {
       <NavBar />
 
       <section className="pt-16 bg-[#29ABE2]">
-        <div className="max-w-7xl mx-auto px-8 py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-10">
           <span className="text-[11px] font-semibold tracking-[3px] uppercase text-white/60 mb-4 block">{e.bannerSub}</span>
-          <h1 className="text-6xl sm:text-7xl md:text-8xl font-black text-white leading-none" style={{ fontFamily: "'Anton', sans-serif" }}>
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-white leading-none" style={{ fontFamily: "'Anton', sans-serif" }}>
             {e.bannerTitle}
           </h1>
         </div>
@@ -111,23 +111,23 @@ export default function ElClubPage() {
 
       <section className="pb-20">
         <SectionHeader title={e.historiaTitle} />
-        <div className="flex flex-col gap-16">
+        <div className="flex flex-col gap-8 md:gap-16">
           {historiaBlocks.map((b) => <StoryBlock key={b.tag} {...b} />)}
         </div>
       </section>
 
       <section>
         <SectionHeader title={e.filosofiaTitle} />
-        <div className="flex flex-col gap-16">
+        <div className="flex flex-col gap-8 md:gap-16">
           {filosofiaBlocks.map((b) => <StoryBlock key={b.tag} {...b} />)}
         </div>
       </section>
 
-      <section className="bg-[#29ABE2] py-20 px-6 text-center mt-20">
-        <h2 className="text-4xl md:text-5xl font-black text-white mb-4" style={{ fontFamily: "'Anton', sans-serif" }}>
+      <section className="bg-[#29ABE2] py-12 sm:py-16 md:py-20 px-4 sm:px-6 text-center mt-10 sm:mt-16 md:mt-20">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4" style={{ fontFamily: "'Anton', sans-serif" }}>
           {e.ctaTitle}
         </h2>
-        <p className="text-white/75 text-lg mb-8 whitespace-nowrap mx-auto tracking-[0.12em]">
+        <p className="text-white/75 text-base sm:text-lg mb-8 mx-auto tracking-[0.12em]">
           {e.ctaSub}
         </p>
         <a href="/tarifes" className="inline-block px-8 py-4 bg-white text-[#1a8bbf] text-sm font-bold tracking-wide uppercase rounded hover:bg-gray-100 transition-colors duration-150">

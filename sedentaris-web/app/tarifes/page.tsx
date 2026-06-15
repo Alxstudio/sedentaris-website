@@ -68,30 +68,74 @@ export default function TarifesPage() {
     <>
       <NavBar />
 
+      {/* Banner */}
       <section className="pt-16 bg-[#29ABE2]">
-        <div className="max-w-7xl mx-auto px-8 py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-10">
           <span className="text-[11px] font-semibold tracking-[3px] uppercase text-white/60 mb-4 block">{tr.bannerSub}</span>
-          <h1 className="text-6xl sm:text-7xl md:text-8xl font-black text-white leading-none" style={{ fontFamily: "'Anton', sans-serif" }}>
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-white leading-none" style={{ fontFamily: "'Anton', sans-serif" }}>
             {tr.bannerTitle}
           </h1>
         </div>
       </section>
 
-      <section className="max-w-5xl mx-auto px-8 py-16">
+      <section className="max-w-5xl mx-auto px-4 sm:px-8 py-10 sm:py-16">
 
-        <div ref={headerRef} className="text-center mb-14">
+        <div ref={headerRef} className="text-center mb-10 sm:mb-14">
           <span className="text-[11px] font-semibold tracking-[3px] uppercase text-[#29ABE2] block mb-3">
             {tr.seasonLabel}
           </span>
           <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4" style={{ fontFamily: "'Anton', sans-serif" }}>
             {tr.sectionTitle}
           </h2>
-          <p className="text-gray-500 text-xl mx-auto leading-relaxed whitespace-nowrap">
+          <p className="text-gray-500 text-base sm:text-xl mx-auto leading-relaxed">
             {tr.sectionSub}
           </p>
         </div>
 
-        <div ref={tableRef} className="rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+        {/* ── Mobile: cards apilades ── */}
+        <div ref={tableRef} className="md:hidden flex flex-col gap-4">
+          {tarifes.map((tar) => (
+            <div
+              key={tar.id}
+              className={`rounded-xl border overflow-hidden ${tar.destacada ? 'border-[#29ABE2] shadow-md' : 'border-gray-200 shadow-sm'}`}
+            >
+              {/* Cap */}
+              <div className={`px-5 py-4 ${tar.destacada ? 'bg-[#29ABE2]' : 'bg-gray-50'}`}>
+                <p className={`text-[11px] font-semibold tracking-[2px] uppercase mb-1 ${tar.destacada ? 'text-white/70' : 'text-gray-500'}`}>
+                  {tar.nom}
+                </p>
+                <p className={`text-3xl font-black leading-none ${tar.destacada ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: "'Anton', sans-serif" }}>
+                  {tar.preu}€
+                </p>
+              </div>
+              {/* Features */}
+              <div className="px-5 py-4 bg-white flex flex-col gap-3">
+                {features.map((feature, i) => (
+                  <div key={feature} className="flex items-center gap-3">
+                    {tar.inclou[i] ? <IconCheck /> : <IconX />}
+                    <span className={`text-sm ${tar.inclou[i] ? 'text-gray-700' : 'text-gray-400'}`}>{feature}</span>
+                  </div>
+                ))}
+              </div>
+              {/* CTA */}
+              <div className={`px-5 py-4 border-t border-gray-100 ${tar.destacada ? 'bg-[#29ABE2]/5' : 'bg-white'}`}>
+                <Link
+                  href={`/contacte?tarifa=${tar.id}`}
+                  className={`w-full flex justify-center px-5 py-2.5 rounded text-xs font-bold tracking-wide uppercase transition-all duration-150 ${
+                    tar.destacada
+                      ? 'bg-[#29ABE2] text-white hover:bg-[#1a9fd4]'
+                      : 'border-2 border-gray-200 text-gray-700 hover:border-[#29ABE2] hover:text-[#29ABE2]'
+                  }`}
+                >
+                  {tr.ctaBtn}
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Desktop: taula grid ── */}
+        <div className="hidden md:block rounded-xl overflow-hidden border border-gray-200 shadow-sm">
 
           {/* Header */}
           <div className="grid grid-cols-[160px_1fr_1fr_1fr] bg-[#29ABE2]/10">
@@ -140,8 +184,9 @@ export default function TarifesPage() {
           </div>
         </div>
 
+        {/* Nota */}
         <div className="mt-8 text-center">
-          <p className="text-lg text-gray-400 leading-relaxed whitespace-nowrap">
+          <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
             {tr.noteIntro} <span className="font-semibold">{tr.noteBtn}</span> {tr.noteMid}
             <br />{tr.noteContact}{' '}
             <a href="mailto:info@sedentaris.cat" className="text-[#29ABE2] hover:underline">

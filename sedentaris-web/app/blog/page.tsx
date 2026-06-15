@@ -69,7 +69,7 @@ function FeaturedPost({ post, t, locale }: { post: Post; t: Translations; locale
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-br from-[#29ABE2]/10 to-transparent" />
           </div>
-          <div className="flex flex-col justify-center p-8 md:p-10 bg-white">
+          <div className="flex flex-col justify-center p-5 sm:p-8 md:p-10 bg-white">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-[10px] font-bold tracking-[2px] uppercase px-2.5 py-1 rounded bg-[#29ABE2] text-white">
                 {t.blog.featured}
@@ -171,17 +171,17 @@ export default function BlogPage() {
       <NavBar />
 
       <section className="pt-16 bg-[#29ABE2]">
-        <div className="max-w-7xl mx-auto px-8 py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-10">
           <span className="text-[11px] font-semibold tracking-[3px] uppercase text-white/60 mb-4 block">
             {t.blog.bannerSub}
           </span>
-          <h1 className="text-6xl sm:text-7xl md:text-8xl font-black text-white leading-none" style={{ fontFamily: "'Anton', sans-serif" }}>
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-white leading-none" style={{ fontFamily: "'Anton', sans-serif" }}>
             {t.blog.bannerTitle}
           </h1>
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-8 py-16">
+      <section className="max-w-7xl mx-auto px-4 sm:px-8 py-10 sm:py-16">
         <div ref={headerRef} className="mb-10">
           <span className="text-[11px] font-semibold tracking-[3px] uppercase text-[#29ABE2] block mb-2">
             {t.blog.sectionSub}

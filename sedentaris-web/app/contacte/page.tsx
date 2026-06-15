@@ -85,16 +85,16 @@ export default function ContactePage() {
       <NavBar />
 
       <section className="pt-16 bg-[#29ABE2]">
-        <div className="max-w-7xl mx-auto px-8 py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-10">
           <span className="text-[11px] font-semibold tracking-[3px] uppercase text-white/60 mb-4 block">{tr.bannerSub}</span>
-          <h1 className="text-6xl sm:text-7xl md:text-8xl font-black text-white leading-none" style={{ fontFamily: "'Anton', sans-serif" }}>
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-white leading-none" style={{ fontFamily: "'Anton', sans-serif" }}>
             {tr.bannerTitle}
           </h1>
         </div>
       </section>
 
-      <section className="max-w-6xl mx-auto px-8 py-16">
-        <div className="grid md:grid-cols-3 gap-12">
+      <section className="max-w-6xl mx-auto px-4 sm:px-8 py-10 sm:py-16">
+        <div className="grid md:grid-cols-3 gap-8 md:gap-12">
 
           {/* Form */}
           <div ref={formRef} className="md:col-span-2">
@@ -157,7 +157,7 @@ export default function ContactePage() {
 
           {/* Info sidebar */}
           <div ref={infoRef} className="flex flex-col">
-            <div className="flex flex-col gap-2 mt-30">
+            <div className="flex flex-col gap-2 mt-6 md:mt-30">
               <div className="flex items-start gap-3 p-4 rounded-xl bg-gray-50 border border-gray-100">
                 <div className="w-9 h-9 rounded-lg bg-[#29ABE2]/10 flex items-center justify-center shrink-0">
                   <svg width="16" height="16" fill="none" stroke="#29ABE2" strokeWidth="1.5" viewBox="0 0 24 24">

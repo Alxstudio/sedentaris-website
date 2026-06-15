@@ -154,7 +154,7 @@ export default function BlogPostPage({ slug }: { slug: string }) {
   return (
     <>
       {/* Hero image */}
-      <div className="pt-16 relative h-[50vh] min-h-[340px] overflow-hidden bg-gray-900">
+      <div className="pt-16 relative h-[50vh] min-h-[260px] sm:min-h-[340px] overflow-hidden bg-gray-900">
         {post.imatge_url && (
           <Image
             src={post.imatge_url}
@@ -168,7 +168,7 @@ export default function BlogPostPage({ slug }: { slug: string }) {
 
         {/* Back link */}
         <div className="absolute top-6 left-0 w-full">
-          <div className="max-w-4xl mx-auto px-8">
+          <div className="max-w-4xl mx-auto px-4 sm:px-8">
             <Link
               href="/blog"
               className="inline-flex items-center gap-2 text-white/70 hover:text-white text-xs font-semibold tracking-wide uppercase transition-colors duration-150"
@@ -183,7 +183,7 @@ export default function BlogPostPage({ slug }: { slug: string }) {
 
         {/* Post meta over image */}
         <div ref={heroRef} className="absolute bottom-0 left-0 w-full">
-          <div className="max-w-4xl mx-auto px-8 pb-10">
+          <div className="max-w-4xl mx-auto px-4 sm:px-8 pb-6 sm:pb-10">
             <div className="flex items-center gap-2 mb-3">
               <span className={`text-[10px] font-semibold tracking-wide uppercase px-2.5 py-1 rounded ${getCategoriaStyle(post.categoria)}`}>
                 {post.categoria}
@@ -195,7 +195,7 @@ export default function BlogPostPage({ slug }: { slug: string }) {
               )}
             </div>
             <h1
-              className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight"
               style={{ fontFamily: "'Anton', sans-serif" }}
             >
               {post.titol}
@@ -205,7 +205,7 @@ export default function BlogPostPage({ slug }: { slug: string }) {
       </div>
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-8 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-8 py-8 sm:py-12">
         <div ref={contentRef}>
           <div className="flex items-center gap-3 mb-8 pb-8 border-b border-gray-100">
             <div className="w-9 h-9 rounded-full bg-[#29ABE2]/10 flex items-center justify-center text-[#29ABE2] font-black text-sm">
@@ -246,7 +246,7 @@ export default function BlogPostPage({ slug }: { slug: string }) {
 
       {/* Related posts */}
       {related.length > 0 && (
-        <div className="bg-gray-50 border-t border-gray-100 py-16 px-8">
+        <div className="bg-gray-50 border-t border-gray-100 py-10 sm:py-16 px-4 sm:px-8">
           <div ref={relatedRef} className="max-w-7xl mx-auto">
             <span className="text-[11px] font-semibold tracking-[3px] uppercase text-[#29ABE2] block mb-2">
               Segueix llegint
