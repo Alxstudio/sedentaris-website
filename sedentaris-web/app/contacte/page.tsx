@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
@@ -58,7 +58,7 @@ function Input({ label, name, type = 'text', required = false, value, onChange }
   )
 }
 
-export default function ContactePage() {
+function ContacteInner() {
   const formRef = useReveal(100)
   const infoRef = useReveal(200)
   const t = useT()
@@ -245,5 +245,13 @@ export default function ContactePage() {
       </section>
       <Footer />
     </>
+  )
+}
+
+export default function ContactePage() {
+  return (
+    <Suspense>
+      <ContacteInner />
+    </Suspense>
   )
 }
