@@ -9,7 +9,15 @@ export const supabase = createClient(
 // ── Client admin (backoffice — bypassa RLS) ──────────────────────────
 export const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+      storageKey: 'sb-admin-no-session',
+    },
+  }
 )
 
 // ── Types ────────────────────────────────────────────────────────────

@@ -22,23 +22,61 @@ import { CSS } from '@dnd-kit/utilities'
 
 type Tab = 'atletes' | 'posts' | 'contacte'
 
+function ConfirmModal({ title, text, onConfirm, onCancel, confirmLabel = 'Eliminar', danger = true }: {
+  title: string; text: string
+  onConfirm: () => void; onCancel: () => void
+  confirmLabel?: string; danger?: boolean
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col gap-4">
+        <div className="flex items-center gap-3">
+          <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${danger ? 'bg-red-100' : 'bg-[#29ABE2]/10'}`}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={danger ? '#ef4444' : '#29ABE2'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <h3 className="text-base font-black text-gray-900" style={{ fontFamily: "'Anton', sans-serif" }}>{title}</h3>
+        </div>
+        <p className="text-sm text-gray-500 leading-relaxed">{text}</p>
+        <div className="flex gap-2 justify-end pt-1">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 border border-gray-200 text-gray-600 text-xs font-bold tracking-wide uppercase rounded-lg hover:border-gray-400 transition-colors duration-150"
+          >
+            Cancel·lar
+          </button>
+          <button
+            onClick={onConfirm}
+            className={`px-4 py-2 text-white text-xs font-bold tracking-wide uppercase rounded-lg transition-colors duration-150 ${danger ? 'bg-red-500 hover:bg-red-600' : 'bg-[#29ABE2] hover:bg-[#1a9fd4]'}`}
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function AdminNav({ tab, setTab, onLogout }: { tab: Tab; setTab: (t: Tab) => void; onLogout: () => void }) {
   return (
-    <header className="bg-[#29ABE2] px-6 h-14 flex items-center justify-between sticky top-0 z-10">
-      <div className="flex items-center gap-6">
-        <span className="font-black text-white text-lg tracking-wide" style={{ fontFamily: "'Anton', sans-serif" }}>
-          SEDENTARIS · ADMIN
+    <header className="bg-[#29ABE2] px-4 sm:px-6 h-14 flex items-center justify-between sticky top-0 z-10">
+      <div className="flex items-center gap-3 sm:gap-6">
+        <span className="font-black text-white text-base sm:text-lg tracking-wide shrink-0" style={{ fontFamily: "'Anton', sans-serif" }}>
+          <span className="hidden sm:inline">SEDENTARIS · </span>ADMIN
         </span>
         <nav className="flex gap-1">
           {(['atletes', 'posts', 'contacte'] as Tab[]).map((t) => (
             <button key={t} onClick={() => setTab(t)}
-              className={`px-3 py-1.5 rounded text-xs font-semibold tracking-wide uppercase transition-all duration-150 ${tab === t ? 'bg-white text-[#29ABE2]' : 'text-white/80 hover:text-white hover:bg-white/20'}`}>
+              className={`px-2 sm:px-3 py-1.5 rounded text-[11px] sm:text-xs font-semibold tracking-wide uppercase transition-all duration-150 ${tab === t ? 'bg-white text-[#29ABE2]' : 'text-white/80 hover:text-white hover:bg-white/20'}`}>
               {t}
             </button>
           ))}
         </nav>
       </div>
-      <button onClick={onLogout} className="text-xs font-semibold text-white/70 hover:text-white transition-colors duration-150">Sortir</button>
+      <button onClick={onLogout} className="text-xs font-semibold text-white/70 hover:text-white transition-colors duration-150 shrink-0">Sortir</button>
     </header>
   )
 }
@@ -106,6 +144,36 @@ function SortableAtleteRow({
         </div>
       </td>
     </tr>
+  )
+}
+
+function SortableAtleteMobileCard({
+  atlete, onEdit, onDelete,
+}: { atlete: Atlete; onEdit: (a: Atlete) => void; onDelete: (id: string) => void }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: atlete.id })
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.45 : 1 }}
+      className={`flex items-center gap-3 p-3 border-b border-gray-100 last:border-0 ${isDragging ? 'bg-[#29ABE2]/5' : ''}`}
+    >
+      <button {...attributes} {...listeners}
+        className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-[#29ABE2] p-1 rounded touch-none shrink-0 transition-colors duration-150">
+        <GripIcon />
+      </button>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-gray-900 truncate">{atlete.nom}</p>
+        <div className="flex flex-wrap gap-1 mt-1">
+          {atlete.disciplines.map((d) => (
+            <span key={d} className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#29ABE2]/10 text-[#29ABE2]">{d}</span>
+          ))}
+        </div>
+      </div>
+      <div className="flex gap-3 shrink-0">
+        <button onClick={() => onEdit(atlete)} className="text-xs font-semibold text-[#29ABE2] hover:underline">Editar</button>
+        <button onClick={() => onDelete(atlete.id)} className="text-xs font-semibold text-red-500 hover:underline">Eliminar</button>
+      </div>
+    </div>
   )
 }
 
@@ -310,13 +378,18 @@ function AtletesTab() {
         ) : (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={atletes.map((a) => a.id)} strategy={verticalListSortingStrategy}>
-              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              {/* Mobile */}
+              <div className="md:hidden bg-white rounded-xl border border-gray-200 overflow-hidden">
+                {atletes.map((a) => (
+                  <SortableAtleteMobileCard key={a.id} atlete={a} onEdit={openEdit} onDelete={handleDelete} />
+                ))}
+              </div>
+              {/* Desktop */}
+              <div className="hidden md:block bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="w-10 pl-3 pr-1 py-3" title="Arrossega per ordenar">
-                        <GripIcon />
-                      </th>
+                      <th className="w-10 pl-3 pr-1 py-3" title="Arrossega per ordenar"><GripIcon /></th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Nom</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Disciplines</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Instagram</th>
@@ -326,12 +399,7 @@ function AtletesTab() {
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {atletes.map((a) => (
-                      <SortableAtleteRow
-                        key={a.id}
-                        atlete={a}
-                        onEdit={openEdit}
-                        onDelete={handleDelete}
-                      />
+                      <SortableAtleteRow key={a.id} atlete={a} onEdit={openEdit} onDelete={handleDelete} />
                     ))}
                   </tbody>
                 </table>
@@ -548,49 +616,81 @@ function PostsTab() {
       ) : posts.length === 0 ? (
         <p className="text-sm text-gray-400">No hi ha posts. Crea'n un!</p>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Títol</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Categoria</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Autor</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">ES</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Estat</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {posts.map((p) => (
-                <tr key={p.id} className="hover:bg-gray-50 transition-colors duration-100">
-                  <td className="px-4 py-3">
-                    <p className="text-sm font-semibold text-gray-900">{p.titol}</p>
-                    <p className="text-xs text-gray-400">{p.slug}</p>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">{p.categoria}</td>
-                  <td className="px-4 py-3 text-sm text-gray-500">{p.autor}</td>
-                  <td className="px-4 py-3">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${p.titol_es ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}`}>
-                      {p.titol_es ? '✓' : '—'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
+        <>
+          {/* Mobile */}
+          <div className="md:hidden bg-white rounded-xl border border-gray-200 overflow-hidden divide-y divide-gray-100">
+            {posts.map((p) => (
+              <div key={p.id} className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 leading-tight">{p.titol}</p>
+                    <p className="text-xs text-gray-400 truncate mt-0.5">{p.slug}</p>
+                    <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                      <span className="text-[10px] font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{p.categoria}</span>
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${p.titol_es ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}`}>
+                        ES {p.titol_es ? '✓' : '—'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-2 shrink-0">
                     <button onClick={() => togglePublicat(p)}
-                      className={`text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wide transition-colors duration-150 ${p.publicat ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
+                      className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide transition-colors duration-150 ${p.publicat ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
                       {p.publicat ? 'Publicat' : 'Esborrany'}
                     </button>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2 justify-end">
+                    <div className="flex gap-3">
                       <button onClick={() => openEdit(p)} className="text-xs font-semibold text-[#29ABE2] hover:underline">Editar</button>
                       <button onClick={() => handleDelete(p.id)} className="text-xs font-semibold text-red-500 hover:underline">Eliminar</button>
                     </div>
-                  </td>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Desktop */}
+          <div className="hidden md:block bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Títol</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Categoria</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Autor</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">ES</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Estat</th>
+                  <th className="px-4 py-3" />
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {posts.map((p) => (
+                  <tr key={p.id} className="hover:bg-gray-50 transition-colors duration-100">
+                    <td className="px-4 py-3">
+                      <p className="text-sm font-semibold text-gray-900">{p.titol}</p>
+                      <p className="text-xs text-gray-400">{p.slug}</p>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{p.categoria}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{p.autor}</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${p.titol_es ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}`}>
+                        {p.titol_es ? '✓' : '—'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button onClick={() => togglePublicat(p)}
+                        className={`text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wide transition-colors duration-150 ${p.publicat ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
+                        {p.publicat ? 'Publicat' : 'Esborrany'}
+                      </button>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-2 justify-end">
+                        <button onClick={() => openEdit(p)} className="text-xs font-semibold text-[#29ABE2] hover:underline">Editar</button>
+                        <button onClick={() => handleDelete(p.id)} className="text-xs font-semibold text-red-500 hover:underline">Eliminar</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   )
@@ -599,6 +699,8 @@ function PostsTab() {
 function ContacteTab() {
   const [missatges, setMissatges] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [replyMenuId, setReplyMenuId] = useState<string | null>(null)
 
   const fetchMissatges = async () => {
     const { data } = await supabase.from('contacte').select('*').order('created_at', { ascending: false })
@@ -613,8 +715,24 @@ function ContacteTab() {
     fetchMissatges()
   }
 
+  const confirmDelete = async () => {
+    if (!deleteId) return
+    const { error } = await supabaseAdmin.from('contacte').delete().eq('id', deleteId)
+    if (error) console.error('Error eliminant missatge:', error.message)
+    setDeleteId(null)
+    fetchMissatges()
+  }
+
   return (
     <div>
+      {deleteId && (
+        <ConfirmModal
+          title="Eliminar missatge"
+          text="Vols eliminar aquest missatge? Aquesta acció no es pot desfer."
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteId(null)}
+        />
+      )}
       <h2 className="text-2xl font-black text-gray-900 mb-6" style={{ fontFamily: "'Anton', sans-serif" }}>CONTACTE</h2>
       {loading ? (
         <p className="text-sm text-gray-400">Carregant...</p>
@@ -623,26 +741,59 @@ function ContacteTab() {
       ) : (
         <div className="flex flex-col gap-3">
           {missatges.map((m) => (
-            <div key={m.id} className={`bg-white rounded-xl border p-5 ${m.llegit ? 'border-gray-100' : 'border-[#29ABE2]/40 shadow-sm'}`}>
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-1">
+            <div key={m.id} className={`bg-white rounded-xl border p-4 sm:p-5 ${m.llegit ? 'border-gray-100' : 'border-[#29ABE2]/40 shadow-sm'}`}>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
                     <span className="text-sm font-bold text-gray-900">{m.nom}</span>
-                    <span className="text-xs text-gray-400">{m.email}</span>
+                    <span className="text-xs text-gray-400 truncate">{m.email}</span>
                     {!m.llegit && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#29ABE2] text-white uppercase">Nou</span>}
                   </div>
                   <p className="text-xs font-semibold text-[#29ABE2] mb-2">{m.assumpte}</p>
                   <p className="text-sm text-gray-600 leading-relaxed">{m.missatge}</p>
                   <p className="text-xs text-gray-400 mt-2">{new Date(m.created_at).toLocaleDateString('ca-ES', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
-                <div className="flex flex-col gap-2 shrink-0">
-                  <a href={`mailto:${m.email}`}
-                    className="px-3 py-1.5 bg-[#29ABE2] text-white text-xs font-bold rounded uppercase tracking-wide hover:bg-[#1a9fd4] transition-colors duration-150 text-center">
-                    Respondre
-                  </a>
+                <div className="flex flex-row sm:flex-col gap-2 shrink-0">
+                  <div className="relative flex-1 sm:flex-none">
+                    <button
+                      onClick={() => setReplyMenuId(replyMenuId === m.id ? null : m.id)}
+                      className="w-full px-3 py-1.5 bg-[#29ABE2] text-white text-xs font-bold rounded uppercase tracking-wide hover:bg-[#1a9fd4] transition-colors duration-150 flex items-center justify-center gap-1.5"
+                    >
+                      Respondre
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+                        <path d="M2 3.5L5 6.5L8 3.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+                      </svg>
+                    </button>
+                    {replyMenuId === m.id && (
+                      <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 min-w-[160px] overflow-hidden">
+                        <a
+                          href={`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(m.email)}&su=${encodeURIComponent('Re: ' + m.assumpte)}`}
+                          target="_blank" rel="noopener noreferrer"
+                          onClick={() => setReplyMenuId(null)}
+                          className="flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors duration-100"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="#EA4335" strokeWidth="1.5"/><polyline points="22,6 12,13 2,6" stroke="#EA4335" strokeWidth="1.5"/></svg>
+                          Gmail
+                        </a>
+                        <a
+                          href={`https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(m.email)}&subject=${encodeURIComponent('Re: ' + m.assumpte)}`}
+                          target="_blank" rel="noopener noreferrer"
+                          onClick={() => setReplyMenuId(null)}
+                          className="flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors duration-100 border-t border-gray-100"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="16" rx="2" stroke="#0078D4" strokeWidth="1.5"/><path d="M2 8l10 6 10-6" stroke="#0078D4" strokeWidth="1.5"/></svg>
+                          Outlook
+                        </a>
+                      </div>
+                    )}
+                  </div>
                   <button onClick={() => toggleLlegit(m.id, m.llegit)}
-                    className="px-3 py-1.5 border border-gray-200 text-gray-500 text-xs font-bold rounded uppercase tracking-wide hover:border-gray-400 transition-colors duration-150">
+                    className="flex-1 sm:flex-none px-3 py-1.5 border border-gray-200 text-gray-500 text-xs font-bold rounded uppercase tracking-wide hover:border-gray-400 transition-colors duration-150">
                     {m.llegit ? 'No llegit' : 'Marcar llegit'}
+                  </button>
+                  <button onClick={() => setDeleteId(m.id)}
+                    className="flex-1 sm:flex-none px-3 py-1.5 border border-red-200 text-red-500 text-xs font-bold rounded uppercase tracking-wide hover:bg-red-50 transition-colors duration-150">
+                    Eliminar
                   </button>
                 </div>
               </div>
@@ -666,7 +817,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <AdminNav tab={tab} setTab={setTab} onLogout={handleLogout} />
-      <main className="max-w-6xl mx-auto px-6 py-10">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {tab === 'atletes' && <AtletesTab />}
         {tab === 'posts' && <PostsTab />}
         {tab === 'contacte' && <ContacteTab />}
