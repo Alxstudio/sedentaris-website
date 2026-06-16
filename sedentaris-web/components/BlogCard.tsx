@@ -53,8 +53,9 @@ function formatData(iso: string) {
 }
 
 // ── Related card ─────────────────────────────────────────────────────
-function RelatedCard({ post, index }: { post: Post; index: number }) {
+function RelatedCard({ post, index, locale }: { post: Post; index: number; locale: string }) {
   const ref = useReveal(index * 80)
+  const titol = locale === 'es' && post.titol_es ? post.titol_es : post.titol
   return (
     <div ref={ref}>
       <Link href={`/blog/${post.slug}`} className="group block">
@@ -63,7 +64,7 @@ function RelatedCard({ post, index }: { post: Post; index: number }) {
             {post.imatge_url && (
               <Image
                 src={post.imatge_url}
-                alt={post.titol}
+                alt={titol}
                 fill
                 className="object-contain transition-transform duration-500 group-hover:scale-105 group-hover:brightness-90"
                 sizes="33vw"
@@ -78,7 +79,7 @@ function RelatedCard({ post, index }: { post: Post; index: number }) {
               className="text-base font-black text-gray-900 mt-2 leading-tight group-hover:text-[#29ABE2] transition-colors duration-200"
               style={{ fontFamily: "'Anton', sans-serif" }}
             >
-              {post.titol}
+              {titol}
             </h4>
             <p className="text-xs text-gray-400 mt-1">{formatData(post.created_at)}</p>
           </div>
@@ -125,6 +126,9 @@ export default function BlogPostPage({ slug }: { slug: string }) {
   const { post, loading, error } = usePost(slug)
   const { posts } = usePosts()
   const related = posts.filter((p) => p.slug !== slug).slice(0, 3)
+  const pathname = usePathname()
+  const locale = pathname.startsWith('/es') ? 'es' : 'ca'
+  const t = useT()
 
   const heroRef = useReveal(0)
   const contentRef = useReveal(100)
@@ -151,6 +155,9 @@ export default function BlogPostPage({ slug }: { slug: string }) {
     )
   }
 
+  const titol = locale === 'es' && post.titol_es ? post.titol_es : post.titol
+  const contingut = locale === 'es' && post.contingut_es ? post.contingut_es : post.contingut
+
   return (
     <>
       {/* Hero image */}
@@ -158,7 +165,7 @@ export default function BlogPostPage({ slug }: { slug: string }) {
         {post.imatge_url && (
           <Image
             src={post.imatge_url}
-            alt={post.titol}
+            alt={titol}
             fill
             className="object-cover opacity-60"
             priority
@@ -198,7 +205,7 @@ export default function BlogPostPage({ slug }: { slug: string }) {
               className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight"
               style={{ fontFamily: "'Anton', sans-serif" }}
             >
-              {post.titol}
+              {titol}
             </h1>
           </div>
         </div>
@@ -217,7 +224,7 @@ export default function BlogPostPage({ slug }: { slug: string }) {
             </div>
           </div>
 
-          <RenderContent text={post.contingut} />
+          <RenderContent text={contingut} />
 
           <div className="mt-12 pt-8 border-t border-gray-100 flex items-center justify-between">
             <Link
@@ -227,15 +234,15 @@ export default function BlogPostPage({ slug }: { slug: string }) {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M19 12H5M12 19l-7-7 7-7" />
               </svg>
-              Tornar al blog
+              {t.blog.backToBlog}
             </Link>
             <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.titol)}&url=${encodeURIComponent(`https://sedentaris.cat/blog/${post.slug}`)}`}
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(titol)}&url=${encodeURIComponent(`https://sedentaris.cat/blog/${post.slug}`)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-[#29ABE2] transition-colors duration-150"
             >
-              Compartir
+              {t.blog.share}
               <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.741l7.733-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
               </svg>
@@ -249,17 +256,17 @@ export default function BlogPostPage({ slug }: { slug: string }) {
         <div className="bg-gray-50 border-t border-gray-100 py-10 sm:py-16 px-4 sm:px-8">
           <div ref={relatedRef} className="max-w-7xl mx-auto">
             <span className="text-[11px] font-semibold tracking-[3px] uppercase text-[#29ABE2] block mb-2">
-              Segueix llegint
+              {t.blog.relatedSub}
             </span>
             <h2
               className="text-3xl font-black text-gray-900 mb-8"
               style={{ fontFamily: "'Anton', sans-serif" }}
             >
-              ALTRES NOTÍCIES
+              {t.blog.relatedTitle}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {related.map((p, i) => (
-                <RelatedCard key={p.id} post={p} index={i} />
+                <RelatedCard key={p.id} post={p} index={i} locale={locale} />
               ))}
             </div>
           </div>

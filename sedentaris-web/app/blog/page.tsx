@@ -156,15 +156,24 @@ function PostSkeleton({ index }: { index: number }) {
   )
 }
 
+function localizePost(post: Post, locale: string): Post {
+  if (locale !== 'es') return post
+  return {
+    ...post,
+    titol: post.titol_es ?? post.titol,
+    resum: post.resum_es ?? post.resum,
+  }
+}
+
 // ── Main ─────────────────────────────────────────────────────────────
 export default function BlogPage() {
   const { posts, loading, error } = usePosts()
+  const pathname = usePathname()
+  const locale = pathname.startsWith('/es') ? 'es' : 'ca'
   const featuredPost = posts.find((p) => p.destacat)
   const otherPosts = posts.filter((p) => !p.destacat)
   const headerRef = useReveal(100)
   const t = useT()
-  const pathname = usePathname()
-  const locale = pathname.startsWith('/es') ? 'es' : 'ca'
 
   return (
     <>
@@ -214,12 +223,12 @@ export default function BlogPage() {
           <>
             {featuredPost && (
               <div className="mb-10">
-                <FeaturedPost post={featuredPost} t={t} locale={locale} />
+                <FeaturedPost post={localizePost(featuredPost, locale)} t={t} locale={locale} />
               </div>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {otherPosts.map((post, i) => (
-                <PostCard key={post.id} post={post} index={i} locale={locale} />
+                <PostCard key={post.id} post={localizePost(post, locale)} index={i} locale={locale} />
               ))}
             </div>
           </>

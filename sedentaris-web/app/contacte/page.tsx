@@ -1,9 +1,16 @@
 'use client'
 
 import { useRef, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import { useT } from '@/lib/i18n'
+
+const PLAN_NOMS: Record<string, { ca: string; es: string; preu: string }> = {
+  '1': { ca: 'Bàsica',            es: 'Básica',            preu: '20€/mes' },
+  '2': { ca: 'Bàsica + Camiseta', es: 'Básica + Camiseta', preu: '45€/mes' },
+  '3': { ca: 'Completa',          es: 'Completa',           preu: '70€/mes' },
+}
 
 function useReveal(delay = 0) {
   const ref = useRef<HTMLDivElement>(null)
@@ -56,8 +63,17 @@ export default function ContactePage() {
   const infoRef = useReveal(200)
   const t = useT()
   const tr = t.contacte
+  const searchParams = useSearchParams()
+  const tarifa = searchParams.get('tarifa')
+  const isEs = typeof window !== 'undefined' && window.location.pathname.startsWith('/es')
+  const pla = tarifa ? PLAN_NOMS[tarifa] : null
+  const plaNom = pla ? (isEs ? pla.es : pla.ca) : null
 
-  const [form, setForm] = useState({ nom: '', email: '', assumpte: '', missatge: '' })
+  const [form, setForm] = useState({
+    nom: '', email: '',
+    assumpte: plaNom ? `Inscripció - Pla ${plaNom}` : '',
+    missatge: '',
+  })
   const [status, setStatus] = useState<FormStatus>('idle')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -68,10 +84,14 @@ export default function ContactePage() {
     e.preventDefault()
     setStatus('sending')
     try {
-      const res = await fetch('/api/contacte', {
+      const endpoint = tarifa ? '/api/inscripcio' : '/api/contacte'
+      const body = tarifa
+        ? { nom: form.nom, email: form.email, missatge: form.missatge, tarifa }
+        : form
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(body),
       })
       if (!res.ok) throw new Error('Error enviant')
       setStatus('success')
@@ -103,7 +123,26 @@ export default function ContactePage() {
               {tr.formTitle}
             </h2>
 
-            {status === 'success' ? (
+            {pla && (
+            <div className="flex items-center gap-3 mb-8 px-4 py-3 rounded-xl bg-[#29ABE2]/8 border border-[#29ABE2]/25">
+              <div className="w-8 h-8 rounded-lg bg-[#29ABE2] flex items-center justify-center shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-[#29ABE2] uppercase tracking-wide">
+                  {isEs ? 'Solicitud de inscripción' : "Sol·licitud d'inscripció"}
+                </p>
+                <p className="text-sm text-gray-700">
+                  {isEs ? 'Plan seleccionado:' : 'Pla seleccionat:'}{' '}
+                  <strong>{plaNom}</strong> — {pla.preu}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {status === 'success' ? (
               <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
                 <div className="w-16 h-16 rounded-full bg-[#29ABE2]/10 flex items-center justify-center">
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#29ABE2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

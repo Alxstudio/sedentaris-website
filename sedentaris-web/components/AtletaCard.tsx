@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import Image from 'next/image'
+import { useT } from '@/lib/i18n'
 
 export interface AtleteData {
   id: string | number
@@ -52,6 +53,12 @@ export function useReveal(delay = 0) {
 
 export default function AtletaCard({ atlete, index = 0 }: { atlete: AtleteData; index?: number }) {
   const ref = useReveal((index % 4) * 80)
+  const t = useT()
+  const disciplineLabels: Record<string, string> = {
+    'Asfalt':        t.atletes.filterAsfalt,
+    'Trail':         t.atletes.filterTrail,
+    'Paraatletisme': t.atletes.filterParaatletisme,
+  }
 
   return (
     <div ref={ref}>
@@ -72,7 +79,7 @@ export default function AtletaCard({ atlete, index = 0 }: { atlete: AtleteData; 
           <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5 md:opacity-0 md:translate-y-1 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300">
             {atlete.disciplines.map((d) => (
               <span key={d} className={`text-[10px] font-semibold tracking-wide uppercase px-2 py-1 rounded ${disciplineStyle[d] ?? 'bg-gray-100 text-gray-600'}`}>
-                {d}
+                {disciplineLabels[d] ?? d}
               </span>
             ))}
           </div>
