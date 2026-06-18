@@ -47,14 +47,14 @@ function TextBlock({ text }: { text: string }) {
   )
 }
 
-function StoryBlock({ tag, title, text, image, reverse }: {
-  tag: string; title: string; text: string; image: string; reverse: boolean
+function StoryBlock({ tag, title, text, image, reverse, objectPosition = 'center' }: {
+  tag: string; title: string; text: string; image: string; reverse: boolean; objectPosition?: string
 }) {
   const ref = useReveal()
   return (
     <div ref={ref} className={`flex flex-col ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'} items-stretch`}>
       <div className="w-full md:w-1/2 relative aspect-[4/3] md:aspect-auto md:min-h-[420px] overflow-hidden bg-gray-100">
-        <Image src={image} alt={title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
+        <Image src={image} alt={title} fill className="object-cover" style={{ objectPosition }} sizes="(max-width: 768px) 100vw, 50vw" />
         <div className="absolute inset-0 bg-gradient-to-br from-[#29ABE2]/20 to-[#29ABE2]/5" />
       </div>
       <div className="w-full md:w-1/2 flex items-center px-6 py-8 sm:px-10 sm:py-14 md:px-16 md:py-20">
@@ -88,12 +88,12 @@ export default function ElClubPage() {
   const e = t.elClub
 
   const historiaBlocks = [
-    { tag: e.historia1Tag, title: e.historia1Title, text: e.historia1Text, image: '/images/sedentaris_capo.jpg',    reverse: false },
-    { tag: e.historia2Tag, title: e.historia2Title, text: e.historia2Text, image: '/images/sdentaris_nassos.jpg',   reverse: true  },
+    { tag: e.historia1Tag, title: e.historia1Title, text: e.historia1Text, image: '/images/viladecans.jpeg',       reverse: false, objectPosition: 'center 80%' },
+    { tag: e.historia2Tag, title: e.historia2Title, text: e.historia2Text, image: '/images/sdentaris_nassos.jpg',  reverse: true,  objectPosition: 'center 80%' },
   ]
   const filosofiaBlocks = [
     { tag: e.filosofia1Tag, title: e.filosofia1Title, text: e.filosofia1Text, image: '/images/sedentaris-merce.jpg', reverse: false },
-    { tag: e.filosofia2Tag, title: e.filosofia2Title, text: e.filosofia2Text, image: '/images/sedentaris_capo.jpg',  reverse: true  },
+    { tag: e.filosofia2Tag, title: e.filosofia2Title, text: e.filosofia2Text, image: '/images/sant_antoni.jpeg',   reverse: true  },
   ]
 
   return (
