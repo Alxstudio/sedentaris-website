@@ -64,7 +64,7 @@ export default function RobaPage() {
     { id: 4, nom: tr.product10, preu: 55, imatge: '/ropa/paravientos_delante.jpg' },
     { id: 8, nom: tr.product14, preu: 45, imatge: '/ropa/sudadera_capucha_delante.jpg' },
     { id: 9, nom: tr.product15, preu: 40, imatge: '/ropa/sudadera_sin_capucha_delante.jpg' },
-    { id: 11, nom: tr.product17, preu: 60, imatge: '/ropa/plumon.jpg' },
+    { id: 11, nom: tr.product17, preu: 60, imatge: '/ropa/plumon_2.png' },
     { id: 7, nom: tr.product13, preu: 20, imatge: '/ropa/manguitos.jpg' },
     { id: 13, nom: tr.product19, preu: 10, imatge: '/ropa/buff.jpg' },
   ]
