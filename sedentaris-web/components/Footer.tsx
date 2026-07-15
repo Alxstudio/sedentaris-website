@@ -11,6 +11,10 @@ const sponsors = [
   { name: "Simagol9",   src: "/patrocinadores/simagol9.webp",   padding: "p-0.5" },
   { name: "Anguila",    src: "/patrocinadores/anguila.webp",    padding: "p-2" },
   { name: "Estate",     src: "/patrocinadores/estate.webp",     padding: "p-2" },
+  { name: "La Sansi",   src: "/patrocinadores/lasansi.png",     padding: "p-2" },
+  { name: "Xip Groc",   src: "/patrocinadores/xipgroc.png",     padding: "p-2" },
+  { name: "FCA",        src: "/patrocinadores/fca.png",         padding: "p-2" },
+  { name: "RFEA",       src: "/patrocinadores/rfea.png",        padding: "p-0", size: "h-32 w-80", className: "-ml-17" },
 ]
 
 export default function Footer() {
@@ -27,7 +31,7 @@ export default function Footer() {
         </p>
         <div className="flex flex-wrap items-center gap-4">
           {sponsors.map((sponsor) => (
-            <div key={sponsor.name} className="relative h-14 w-36 overflow-hidden flex items-center justify-center">
+            <div key={sponsor.name} className={`relative overflow-hidden flex items-center justify-center ${sponsor.size ?? "h-14 w-36"} ${sponsor.className ?? ""}`}>
               <Image
                 src={sponsor.src}
                 alt={sponsor.name}
