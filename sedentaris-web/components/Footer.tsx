@@ -1,6 +1,8 @@
 'use client'
 
 import Image from "next/image"
+import Link from "next/link"
+import { usePathname } from 'next/navigation'
 import { useT } from '@/lib/i18n'
 
 const sponsors = [
@@ -20,9 +22,70 @@ const sponsors = [
 export default function Footer() {
   const year = new Date().getFullYear()
   const t = useT()
+  const pathname = usePathname()
+  const prefix = pathname.startsWith('/es') ? '/es' : ''
+
+  // Enllaços amb anchor text descriptiu: reforcen les pàgines que volem que
+  // Google esculli com a sitelinks (El Club, Fes-te soci, Blog).
+  const footerLinks = [
+    { href: '/el-club',  label: t.footer.navElClub },
+    { href: '/tarifes',  label: t.footer.navTarifes },
+    { href: '/blog',     label: t.footer.navBlog },
+    { href: '/atletes',  label: t.footer.navAtletes },
+    { href: '/roba',     label: t.footer.navRoba },
+    { href: '/contacte', label: t.footer.navContacte },
+  ]
+
+  // Les curses que organitza el club: només al footer, per no saturar el navbar.
+  const cursaLinks = [
+    { href: '/el-capo-puja-al-castell', label: t.footer.navCapo },
+    { href: '/canicross',               label: t.footer.navCanicross },
+  ]
 
   return (
     <footer className="bg-white border-t border-gray-200">
+
+      {/* Navegació */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-10">
+        <p className="text-[10px] font-semibold tracking-[3px] uppercase text-gray-400 mb-5">
+          {t.footer.navTitle}
+        </p>
+        <nav aria-label={t.footer.ariaNav}>
+          <ul className="flex flex-wrap gap-x-8 gap-y-3">
+            {footerLinks.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={`${prefix}${link.href}`}
+                  className="text-sm text-gray-600 hover:text-[#29ABE2] transition-colors duration-150"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+
+      {/* Curses del club */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-8">
+        <p className="text-[10px] font-semibold tracking-[3px] uppercase text-gray-400 mb-5">
+          {t.footer.cursesTitle}
+        </p>
+        <nav aria-label={t.footer.ariaCursesNav}>
+          <ul className="flex flex-wrap gap-x-8 gap-y-3">
+            {cursaLinks.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={`${prefix}${link.href}`}
+                  className="text-sm text-gray-600 hover:text-[#29ABE2] transition-colors duration-150"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
 
       {/* Sponsors */}
       <div className="max-w-7xl mx-auto px-4 sm:px-8 py-10">

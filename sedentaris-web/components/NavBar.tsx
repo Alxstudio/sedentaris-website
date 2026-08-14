@@ -3,29 +3,51 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useT } from '@/lib/i18n'
 
+/**
+ * Selector d'idioma.
+ *
+ * Fem servir <button> + router.push() en comptes de <Link> a propòsit: amb
+ * enllaços, Google indexava "CA" i "ES" com si fossin pàgines de contingut i
+ * els mostrava com a sitelinks. Un botó no és rastrejable, així que les
+ * versions /es segueixen sent indexables però només via sitemap i hreflang.
+ */
 function LangSwitcher({ className = '' }: { className?: string }) {
   const pathname = usePathname()
+  const router = useRouter()
+  const t = useT()
   const isEs = pathname.startsWith('/es')
   const basePath = isEs ? pathname.slice(3) || '/' : pathname
 
   return (
-    <div className={`flex items-center gap-0.5 text-xs font-semibold ${className}`}>
-      <Link
-        href={basePath}
-        className={`px-2 py-1 rounded transition-colors duration-150 ${!isEs ? 'bg-white text-[#1a8bbf]' : 'text-white/70 hover:text-white'}`}
+    <div
+      role="group"
+      aria-label={t.nav.ariaLang}
+      className={`flex items-center gap-0.5 text-xs font-semibold ${className}`}
+    >
+      <button
+        type="button"
+        lang="ca"
+        aria-label={t.nav.ariaLangCa}
+        aria-current={!isEs ? 'true' : undefined}
+        onClick={() => router.push(basePath)}
+        className={`px-2 py-1 rounded transition-colors duration-150 cursor-pointer ${!isEs ? 'bg-white text-[#1a8bbf]' : 'text-white/70 hover:text-white'}`}
       >
         CA
-      </Link>
-      <span className="text-white/30">|</span>
-      <Link
-        href={`/es${basePath === '/' ? '' : basePath}`}
-        className={`px-2 py-1 rounded transition-colors duration-150 ${isEs ? 'bg-white text-[#1a8bbf]' : 'text-white/70 hover:text-white'}`}
+      </button>
+      <span className="text-white/30" aria-hidden="true">|</span>
+      <button
+        type="button"
+        lang="es"
+        aria-label={t.nav.ariaLangEs}
+        aria-current={isEs ? 'true' : undefined}
+        onClick={() => router.push(`/es${basePath === '/' ? '' : basePath}`)}
+        className={`px-2 py-1 rounded transition-colors duration-150 cursor-pointer ${isEs ? 'bg-white text-[#1a8bbf]' : 'text-white/70 hover:text-white'}`}
       >
         ES
-      </Link>
+      </button>
     </div>
   )
 }
@@ -37,13 +59,14 @@ export default function NavBar({ previewMode = false }: { previewMode?: boolean 
   const prefix = isEs ? '/es' : ''
   const t = useT()
 
+  // `title` dona a Google un anchor text descriptiu sense embrutar el disseny.
   const navLinks = [
-    { href: '/el-club',  label: t.nav.elClub,   preview: false },
-    { href: '/atletes',  label: t.nav.atletes,   preview: true  },
-    { href: '/blog',     label: t.nav.blog,      preview: false },
-    { href: '/tarifes',  label: t.nav.tarifes,   preview: false },
-    { href: '/roba',     label: t.nav.roba,      preview: false },
-    { href: '/contacte', label: t.nav.contacte,  preview: false },
+    { href: '/el-club',  label: t.nav.elClub,   title: t.nav.ariaElClub,   preview: false },
+    { href: '/atletes',  label: t.nav.atletes,  title: t.nav.ariaAtletes,  preview: true  },
+    { href: '/blog',     label: t.nav.blog,     title: t.nav.ariaBlog,     preview: false },
+    { href: '/tarifes',  label: t.nav.tarifes,  title: t.nav.ariaTarifes,  preview: false },
+    { href: '/roba',     label: t.nav.roba,     title: t.nav.ariaRoba,     preview: false },
+    { href: '/contacte', label: t.nav.contacte, title: t.nav.ariaContacte, preview: false },
   ]
 
   return (
@@ -63,7 +86,7 @@ export default function NavBar({ previewMode = false }: { previewMode?: boolean 
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-4 absolute left-1/2 -translate-x-1/2">
+        <nav aria-label={t.nav.ariaMenu} className="hidden md:flex items-center gap-4 absolute left-1/2 -translate-x-1/2">
           {navLinks.map((link) => {
             const blocked = previewMode && !link.preview
             return blocked ? (
@@ -82,6 +105,7 @@ export default function NavBar({ previewMode = false }: { previewMode?: boolean 
               <Link
                 key={link.href}
                 href={previewMode ? '/preview/atletes' : `${prefix}${link.href}`}
+                title={link.title}
                 className="px-4 py-2 text-base font-medium whitespace-nowrap text-white/85 hover:text-white hover:scale-110 transition-all duration-200 inline-block"
               >
                 {link.label}
@@ -107,7 +131,7 @@ export default function NavBar({ previewMode = false }: { previewMode?: boolean 
 
       {/* Mobile menu */}
       <div className={`md:hidden bg-[#1a8bbf]/90 border-t border-white/20 transition-all duration-300 overflow-hidden ${menuOpen ? 'max-h-96' : 'max-h-0'}`}>
-        <nav className="px-6 py-3 flex flex-col gap-1">
+        <nav aria-label={t.nav.ariaMenu} className="px-6 py-3 flex flex-col gap-1">
           {navLinks.map((link) => {
             const blocked = previewMode && !link.preview
             return blocked ? (
@@ -125,6 +149,7 @@ export default function NavBar({ previewMode = false }: { previewMode?: boolean 
               <Link
                 key={link.href}
                 href={previewMode ? '/preview/atletes' : `${prefix}${link.href}`}
+                title={link.title}
                 onClick={() => setMenuOpen(false)}
                 className="px-4 py-3 rounded text-white font-medium hover:bg-white/20 transition-all duration-150"
               >
