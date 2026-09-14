@@ -8,6 +8,7 @@ const PLANS: Record<string, { nom: string; preu: string; color: string }> = {
   '1': { nom: 'Bàsica',              preu: '20€/mes', color: '#6b7280' },
   '2': { nom: 'Bàsica + Camiseta',   preu: '45€/mes', color: '#29ABE2' },
   '3': { nom: 'Completa',            preu: '70€/mes', color: '#0e7490' },
+  '4': { nom: 'Bàsica + Tirants',    preu: '40€/mes', color: '#0284c7' },
 }
 
 export async function POST(request: Request) {

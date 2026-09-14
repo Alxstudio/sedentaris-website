@@ -60,6 +60,7 @@ export default function TarifesPage() {
 
   const tarifes = [
     { id: 1, nom: tr.plan0Nom, preu: 20, inclou: [true, true, true, false, false], destacada: false },
+    { id: 4, nom: tr.plan3Nom, preu: 40, inclou: [true, true, true, false, true ], destacada: false },
     { id: 2, nom: tr.plan1Nom, preu: 45, inclou: [true, true, true, true,  false], destacada: true  },
     { id: 3, nom: tr.plan2Nom, preu: 70, inclou: [true, true, true, true,  true ], destacada: false },
   ]
@@ -138,7 +139,7 @@ export default function TarifesPage() {
         <div className="hidden md:block rounded-xl overflow-hidden border border-gray-200 shadow-sm">
 
           {/* Header */}
-          <div className="grid grid-cols-[160px_1fr_1fr_1fr] bg-[#29ABE2]/10">
+          <div className="grid grid-cols-[160px_repeat(4,1fr)] bg-[#29ABE2]/10">
             <div className="px-6 py-5 text-xs font-semibold tracking-widest uppercase text-[#29ABE2]">
               {tr.tableHeader}
             </div>
@@ -156,7 +157,7 @@ export default function TarifesPage() {
 
           {/* Feature rows */}
           {features.map((feature, i) => (
-            <div key={feature} ref={useReveal(i * 60)} className={`grid grid-cols-[160px_1fr_1fr_1fr] items-center border-b border-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
+            <div key={feature} ref={useReveal(i * 60)} className={`grid grid-cols-[160px_repeat(4,1fr)] items-center border-b border-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
               <div className="px-6 py-4 text-sm text-gray-600 font-medium">{feature}</div>
               {tarifes.map((tar, j) => (
                 <div key={j} className={`flex items-center justify-center py-4 ${tar.destacada ? 'bg-[#29ABE2]/5' : ''}`}>
@@ -167,7 +168,7 @@ export default function TarifesPage() {
           ))}
 
           {/* CTA row */}
-          <div className="grid grid-cols-[160px_1fr_1fr_1fr] items-center bg-white border-t border-gray-200">
+          <div className="grid grid-cols-[160px_repeat(4,1fr)] items-center bg-white border-t border-gray-200">
             <div className="px-6 py-6 text-xs text-gray-400 font-medium">{tr.ctaLabel}</div>
             {tarifes.map((tar) => (
               <div key={tar.id} className={`flex justify-center py-6 ${tar.destacada ? 'bg-[#29ABE2]/5' : ''}`}>

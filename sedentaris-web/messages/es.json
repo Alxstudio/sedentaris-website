@@ -97,7 +97,8 @@
     "feature4": "Camiseta de tirantes",
     "plan0Nom": "Básica",
     "plan1Nom": "Básica + Camiseta",
-    "plan2Nom": "Completa"
+    "plan2Nom": "Completa",
+    "plan3Nom": "Básica + Tirantes"
   },
   "curses": {
     "lastEditionNotice": "Esta información corresponde a la última edición celebrada. Los datos de la próxima edición se publicarán cuando se abran las inscripciones.",

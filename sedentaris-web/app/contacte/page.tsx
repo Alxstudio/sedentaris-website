@@ -10,6 +10,7 @@ const PLAN_NOMS: Record<string, { ca: string; es: string; preu: string }> = {
   '1': { ca: 'Bàsica',            es: 'Básica',            preu: '20€/mes' },
   '2': { ca: 'Bàsica + Camiseta', es: 'Básica + Camiseta', preu: '45€/mes' },
   '3': { ca: 'Completa',          es: 'Completa',           preu: '70€/mes' },
+  '4': { ca: 'Bàsica + Tirants',  es: 'Básica + Tirantes',  preu: '40€/mes' },
 }
 
 function useReveal(delay = 0) {
