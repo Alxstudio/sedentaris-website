@@ -43,6 +43,7 @@ export interface Post {
   categoria: string
   autor: string
   imatge_url: string | null
+  imatges: string[] | null
   destacat: boolean
   publicat: boolean
   created_at: string

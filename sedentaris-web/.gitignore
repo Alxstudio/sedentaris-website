@@ -36,6 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# importació de notícies: fotos originals (es pugen a Supabase) i backups de la BD
+/public/news
+/news-import/backups
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

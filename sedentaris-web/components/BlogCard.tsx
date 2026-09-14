@@ -3,6 +3,7 @@
 import { useRef, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import HeroCarousel from '@/components/HeroCarousel'
 import { usePost, usePosts } from '@/lib/usePosts'
 import type { Post } from '@/lib/supabase'
 import { useT } from '@/lib/i18n'
@@ -162,15 +163,10 @@ export default function BlogPostPage({ slug }: { slug: string }) {
     <>
       {/* Hero image */}
       <div className="pt-16 relative h-[50vh] min-h-[260px] sm:min-h-[340px] overflow-hidden bg-gray-900">
-        {post.imatge_url && (
-          <Image
-            src={post.imatge_url}
-            alt={titol}
-            fill
-            className="object-cover opacity-60"
-            priority
-          />
-        )}
+        <HeroCarousel
+          images={post.imatges?.length ? post.imatges : post.imatge_url ? [post.imatge_url] : []}
+          alt={titol}
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
         {/* Back link */}
