@@ -39,6 +39,7 @@ yarn-error.log*
 # importació de notícies: fotos originals (es pugen a Supabase) i backups de la BD
 /public/news
 /news-import/backups
+__pycache__/
 
 # typescript
 *.tsbuildinfo
