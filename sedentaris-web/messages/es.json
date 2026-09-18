@@ -70,6 +70,8 @@
     "bannerTitle": "BLOG",
     "sectionSub": "Novedades del club",
     "sectionTitle": "ÚLTIMAS NOTICIAS",
+    "filterYear": "Filtrar por año",
+    "noPosts": "No hay noticias de este año.",
     "featured": "Destacado",
     "readMore": "Leer",
     "relatedSub": "Sigue leyendo",

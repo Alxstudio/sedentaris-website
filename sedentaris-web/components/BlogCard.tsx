@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import PostGallery from '@/components/PostGallery'
@@ -55,29 +55,36 @@ function formatData(iso: string) {
 
 // ── Portada de la notícia ────────────────────────────────────────────
 /**
- * Marc 4/5 per a la foto principal. Les fotos importades són de mòbil i la
- * majoria verticals (~0,75), així que omplen el marc gairebé exacte; les
- * apaïsades queden centrades sobre una còpia ampliada i desenfocada de la
- * mateixa foto, que dona color al buit en comptes d'una franja grisa.
+ * El marc de la foto principal pren la proporció real de la foto, que llegim
+ * quan carrega: així les verticals de mòbil i les apaïsades omplen el marc
+ * senceres, sense franges ni retall. Fora d'aquest rang la foto sí que es
+ * retalla, perquè una panoràmica o una foto molt allargada desmuntarien la
+ * capçalera.
  */
+const LEAD_MIN_RATIO = 0.7  // més vertical que això, es retalla
+const LEAD_MAX_RATIO = 1.6  // més apaïsat que això, es retalla
+
 function LeadImage({ src, alt, priority = false }: { src: string; alt: string; priority?: boolean }) {
+  const [ratio, setRatio] = useState<number | null>(null)
+
   return (
-    <div className="relative aspect-4/5 overflow-hidden rounded-xl bg-gray-900">
-      <Image
-        src={src}
-        alt=""
-        aria-hidden
-        fill
-        sizes="(max-width: 768px) 100vw, 45vw"
-        className="scale-110 object-cover blur-2xl brightness-[0.55]"
-      />
+    <div
+      className="relative overflow-hidden rounded-xl bg-gray-900"
+      style={{ aspectRatio: ratio ?? 4 / 5 }}
+    >
       <Image
         src={src}
         alt={alt}
         fill
         sizes="(max-width: 768px) 100vw, 45vw"
         preload={priority}
-        className="object-contain"
+        onLoad={(e) => {
+          const { naturalWidth, naturalHeight } = e.currentTarget
+          if (!naturalWidth || !naturalHeight) return
+          const r = naturalWidth / naturalHeight
+          setRatio(Math.min(Math.max(r, LEAD_MIN_RATIO), LEAD_MAX_RATIO))
+        }}
+        className="object-cover"
       />
     </div>
   )

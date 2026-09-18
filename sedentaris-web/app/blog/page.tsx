@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import NavBar from '@/components/NavBar'
@@ -179,6 +179,53 @@ function PostSkeleton({ index }: { index: number }) {
   )
 }
 
+// ── Filtre d'any ──────────────────────────────────────────────────────
+/**
+ * Els anys que cobreix l'arxiu, del més recent al més antic. No hi ha opció
+ * "tots": el blog obre sempre per l'any en curs de l'arxiu. Quan entrin
+ * notícies d'un any nou, cal afegir-lo aquí al davant.
+ */
+const YEARS = [2025, 2024, 2023] as const
+
+/** Tallem la cadena ISO en comptes de passar per Date: així l'any no balla
+ *  segons la zona horària del navegador ni difereix del que renderitza el servidor. */
+function postYear(post: Post) {
+  return Number(post.created_at.slice(0, 4))
+}
+
+function YearFilter({
+  value,
+  onChange,
+  label,
+}: {
+  value: number
+  onChange: (year: number) => void
+  label: string
+}) {
+  return (
+    <div role="group" aria-label={label} className="flex flex-wrap gap-2">
+      {YEARS.map((year) => {
+        const active = year === value
+        return (
+          <button
+            key={year}
+            type="button"
+            onClick={() => onChange(year)}
+            aria-pressed={active}
+            className={`rounded-full px-4 py-2 text-sm font-semibold tabular-nums transition-colors duration-200 ${
+              active
+                ? 'bg-[#29ABE2] text-white'
+                : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-900'
+            }`}
+          >
+            {year}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 function localizePost(post: Post, locale: string): Post {
   if (locale !== 'es') return post
   return {
@@ -193,8 +240,10 @@ export default function BlogPage() {
   const { posts, loading, error } = usePosts()
   const pathname = usePathname()
   const locale = pathname.startsWith('/es') ? 'es' : 'ca'
-  const featuredPost = posts.find((p) => p.destacat)
-  const otherPosts = posts.filter((p) => !p.destacat)
+  const [year, setYear] = useState<number>(YEARS[0])
+  const yearPosts = posts.filter((p) => postYear(p) === year)
+  const featuredPost = yearPosts.find((p) => p.destacat)
+  const otherPosts = yearPosts.filter((p) => !p.destacat)
   const headerRef = useReveal(100)
   const t = useT()
 
@@ -214,13 +263,16 @@ export default function BlogPage() {
       </section>
 
       <section className="max-w-7xl mx-auto px-4 sm:px-8 py-10 sm:py-16">
-        <div ref={headerRef} className="mb-10">
-          <span className="text-[11px] font-semibold tracking-[3px] uppercase text-[#29ABE2] block mb-2">
-            {t.blog.sectionSub}
-          </span>
-          <h2 className="text-4xl font-black text-gray-900" style={{ fontFamily: "'Anton', sans-serif" }}>
-            {t.blog.sectionTitle}
-          </h2>
+        <div ref={headerRef} className="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <span className="text-[11px] font-semibold tracking-[3px] uppercase text-[#29ABE2] block mb-2">
+              {t.blog.sectionSub}
+            </span>
+            <h2 className="text-4xl font-black text-gray-900" style={{ fontFamily: "'Anton', sans-serif" }}>
+              {t.blog.sectionTitle}
+            </h2>
+          </div>
+          <YearFilter value={year} onChange={setYear} label={t.blog.filterYear} />
         </div>
 
         {error && <p className="text-center py-20 text-sm text-red-400">{error}</p>}
@@ -242,7 +294,11 @@ export default function BlogPage() {
           </>
         )}
 
-        {!loading && !error && (
+        {!loading && !error && yearPosts.length === 0 && (
+          <p className="text-center py-20 text-sm text-gray-400">{t.blog.noPosts}</p>
+        )}
+
+        {!loading && !error && yearPosts.length > 0 && (
           <>
             {featuredPost && (
               <div className="mb-10">
