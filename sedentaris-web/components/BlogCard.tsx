@@ -3,7 +3,7 @@
 import { useRef, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import HeroCarousel from '@/components/HeroCarousel'
+import PostGallery from '@/components/PostGallery'
 import { usePost, usePosts } from '@/lib/usePosts'
 import type { Post } from '@/lib/supabase'
 import { useT } from '@/lib/i18n'
@@ -53,6 +53,36 @@ function formatData(iso: string) {
   return new Date(iso).toLocaleDateString('ca-ES', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+// ── Portada de la notícia ────────────────────────────────────────────
+/**
+ * Marc 4/5 per a la foto principal. Les fotos importades són de mòbil i la
+ * majoria verticals (~0,75), així que omplen el marc gairebé exacte; les
+ * apaïsades queden centrades sobre una còpia ampliada i desenfocada de la
+ * mateixa foto, que dona color al buit en comptes d'una franja grisa.
+ */
+function LeadImage({ src, alt, priority = false }: { src: string; alt: string; priority?: boolean }) {
+  return (
+    <div className="relative aspect-4/5 overflow-hidden rounded-xl bg-gray-900">
+      <Image
+        src={src}
+        alt=""
+        aria-hidden
+        fill
+        sizes="(max-width: 768px) 100vw, 45vw"
+        className="scale-110 object-cover blur-2xl brightness-[0.55]"
+      />
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes="(max-width: 768px) 100vw, 45vw"
+        preload={priority}
+        className="object-contain"
+      />
+    </div>
+  )
+}
+
 // ── Related card ─────────────────────────────────────────────────────
 function RelatedCard({ post, index, locale }: { post: Post; index: number; locale: string }) {
   const ref = useReveal(index * 80)
@@ -61,14 +91,16 @@ function RelatedCard({ post, index, locale }: { post: Post; index: number; local
     <div ref={ref}>
       <Link href={`/blog/${post.slug}`} className="group block">
         <div className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-[#29ABE2]/30 hover:shadow-lg transition-all duration-300">
-          <div className="relative aspect-[16/9] overflow-hidden bg-gray-100">
+          {/* 4/3 amb el retall desplaçat amunt: hi caben les apaïsades senceres
+              i a les verticals els conserva cares i dorsals. */}
+          <div className="relative aspect-4/3 overflow-hidden bg-gray-100">
             {post.imatge_url && (
               <Image
                 src={post.imatge_url}
                 alt={titol}
                 fill
-                className="object-contain transition-transform duration-500 group-hover:scale-105 group-hover:brightness-90"
-                sizes="33vw"
+                className="object-cover object-[center_30%] transition-transform duration-500 group-hover:scale-105"
+                sizes="(max-width: 640px) 100vw, 33vw"
               />
             )}
           </div>
@@ -158,36 +190,32 @@ export default function BlogPostPage({ slug }: { slug: string }) {
 
   const titol = locale === 'es' && post.titol_es ? post.titol_es : post.titol
   const contingut = locale === 'es' && post.contingut_es ? post.contingut_es : post.contingut
+  // Les notícies importades porten totes les fotos a `imatges`; les antigues,
+  // només `imatge_url`. Amb una sola foto no hi ha galeria: ja és la portada.
+  const galeria = post.imatges?.length ? post.imatges : post.imatge_url ? [post.imatge_url] : []
 
   return (
     <>
-      {/* Hero image */}
-      <div className="pt-16 relative h-[50vh] min-h-[260px] sm:min-h-[340px] overflow-hidden bg-gray-900">
-        <HeroCarousel
-          images={post.imatges?.length ? post.imatges : post.imatge_url ? [post.imatge_url] : []}
-          alt={titol}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-        {/* Back link */}
-        <div className="absolute top-6 left-0 w-full">
-          <div className="max-w-4xl mx-auto px-4 sm:px-8">
-            <Link
-              href="/blog"
-              className="inline-flex items-center gap-2 text-white/70 hover:text-white text-xs font-semibold tracking-wide uppercase transition-colors duration-150"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-              Blog
-            </Link>
-          </div>
+      {/* Capçalera editorial: el titular mana i la foto conserva el seu format */}
+      <header className="pt-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 pt-6">
+          <Link
+            href="/blog"
+            className="inline-flex items-center gap-2 text-gray-400 hover:text-[#29ABE2] text-xs font-semibold tracking-wide uppercase transition-colors duration-150"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Blog
+          </Link>
         </div>
 
-        {/* Post meta over image */}
-        <div ref={heroRef} className="absolute bottom-0 left-0 w-full">
-          <div className="max-w-4xl mx-auto px-4 sm:px-8 pb-6 sm:pb-10">
-            <div className="flex items-center gap-2 mb-3">
+        <div
+          ref={heroRef}
+          className="max-w-6xl mx-auto px-4 sm:px-8 py-6 sm:py-10 grid gap-8 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:gap-12 md:items-center"
+        >
+          <div>
+            <div className="flex items-center gap-2 mb-5">
               <span className={`text-[10px] font-semibold tracking-wide uppercase px-2.5 py-1 rounded ${getCategoriaStyle(post.categoria)}`}>
                 {post.categoria}
               </span>
@@ -198,29 +226,41 @@ export default function BlogPostPage({ slug }: { slug: string }) {
               )}
             </div>
             <h1
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight"
+              className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 leading-[1.05] text-balance"
               style={{ fontFamily: "'Anton', sans-serif" }}
             >
               {titol}
             </h1>
+            <div className="mt-6 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-[#29ABE2]/10 flex items-center justify-center text-[#29ABE2] font-black text-sm">
+                {post.autor.charAt(0)}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">{post.autor}</p>
+                <p className="text-xs text-gray-400">{formatData(post.created_at)}</p>
+              </div>
+            </div>
           </div>
+
+          {/* A mòbil la foto obre la pàgina; el titular es queda primer al DOM. */}
+          {post.imatge_url && (
+            <div className="order-first md:order-0">
+              <LeadImage src={post.imatge_url} alt={titol} priority />
+            </div>
+          )}
         </div>
-      </div>
+      </header>
 
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-8 py-8 sm:py-12">
         <div ref={contentRef}>
-          <div className="flex items-center gap-3 mb-8 pb-8 border-b border-gray-100">
-            <div className="w-9 h-9 rounded-full bg-[#29ABE2]/10 flex items-center justify-center text-[#29ABE2] font-black text-sm">
-              {post.autor.charAt(0)}
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-900">{post.autor}</p>
-              <p className="text-xs text-gray-400">{formatData(post.created_at)}</p>
-            </div>
-          </div>
-
           <RenderContent text={contingut} />
+
+          {galeria.length > 1 && (
+            <div className="mt-12">
+              <PostGallery images={galeria} alt={titol} />
+            </div>
+          )}
 
           <div className="mt-12 pt-8 border-t border-gray-100 flex items-center justify-between">
             <Link

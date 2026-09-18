@@ -75,7 +75,13 @@
     "relatedSub": "Sigue leyendo",
     "relatedTitle": "OTRAS NOTICIAS",
     "backToBlog": "Volver al blog",
-    "share": "Compartir"
+    "share": "Compartir",
+    "galleryTitle": "LA GALERÍA",
+    "galleryClose": "Cerrar la galería",
+    "galleryPrev": "Foto anterior",
+    "galleryNext": "Foto siguiente",
+    "photo": "foto",
+    "photos": "fotos"
   },
   "tarifes": {
     "bannerSub": "Únete",

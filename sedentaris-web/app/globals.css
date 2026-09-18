@@ -1,4 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap');
+/**
+ * Anton és la veu dels titulars: tot el projecte l'invoca amb
+ * `fontFamily: "'Anton', sans-serif"`, però mai s'havia carregat i els
+ * titulars queien al sans-serif del sistema (Arial).
+ */
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -20,3 +25,19 @@ body {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #29ABE2; border-radius: 3px; }
+
+::selection {
+  background: #29ABE2;
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid #29ABE2;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* El lightbox de la galeria bloqueja l'scroll del document mentre és obert. */
+body[data-scroll-locked='true'] {
+  overflow: hidden;
+}

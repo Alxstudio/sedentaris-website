@@ -75,7 +75,13 @@
     "relatedSub": "Segueix llegint",
     "relatedTitle": "ALTRES NOTÍCIES",
     "backToBlog": "Tornar al blog",
-    "share": "Compartir"
+    "share": "Compartir",
+    "galleryTitle": "LA GALERIA",
+    "galleryClose": "Tancar la galeria",
+    "galleryPrev": "Foto anterior",
+    "galleryNext": "Foto següent",
+    "photo": "foto",
+    "photos": "fotos"
   },
   "tarifes": {
     "bannerSub": "Uneix-te",

@@ -55,6 +55,26 @@ function formatData(iso: string, locale: string) {
   return new Date(iso).toLocaleDateString(lang, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+/**
+ * Les notícies importades porten fins a una desena de fotos que només es veuen
+ * un cop dins. El comptador ho anuncia des de la portada.
+ */
+function PhotoCount({ post, t }: { post: Post; t: Translations }) {
+  const total = post.imatges?.length ?? 0
+  if (total < 2) return null
+  return (
+    <span className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <path d="m21 15-5-5L5 21" />
+      </svg>
+      <span className="tabular-nums">{total}</span>
+      <span className="sr-only">{t.blog.photos}</span>
+    </span>
+  )
+}
+
 // ── Featured post ─────────────────────────────────────────────────────
 function FeaturedPost({ post, t, locale }: { post: Post; t: Translations; locale: string }) {
   const ref = useReveal(100)
@@ -62,12 +82,14 @@ function FeaturedPost({ post, t, locale }: { post: Post; t: Translations; locale
     <div ref={ref}>
       <Link href={`/blog/${post.slug}`} className="group block">
         <div className="grid md:grid-cols-2 gap-0 rounded-xl overflow-hidden border border-gray-200 hover:border-[#29ABE2]/40 hover:shadow-lg transition-all duration-300">
-          <div className="relative aspect-video md:aspect-auto md:min-h-[340px] overflow-hidden bg-gray-100">
+          {/* Retall a 4/3 desplaçat amunt: les fotos de mòbil verticals hi
+              conserven cares i dorsals i les apaïsades hi caben senceres. */}
+          <div className="relative aspect-4/3 md:aspect-auto md:min-h-85 overflow-hidden bg-gray-100">
             {post.imatge_url && (
-              <Image src={post.imatge_url} alt={post.titol} fill className="object-contain transition-transform duration-500 group-hover:scale-105" sizes="(max-width: 768px) 100vw, 50vw" />
+              <Image src={post.imatge_url} alt={post.titol} fill className="object-cover object-[center_30%] transition-transform duration-500 group-hover:scale-105" sizes="(max-width: 768px) 100vw, 50vw" />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-br from-[#29ABE2]/10 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
+            <PhotoCount post={post} t={t} />
           </div>
           <div className="flex flex-col justify-center p-5 sm:p-8 md:p-10 bg-white">
             <div className="flex items-center gap-3 mb-4">
@@ -103,16 +125,17 @@ function FeaturedPost({ post, t, locale }: { post: Post; t: Translations; locale
 }
 
 // ── Post card ─────────────────────────────────────────────────────────
-function PostCard({ post, index, locale }: { post: Post; index: number; locale: string }) {
+function PostCard({ post, index, locale, t }: { post: Post; index: number; locale: string; t: Translations }) {
   const ref = useReveal((index % 3) * 80)
   return (
     <div ref={ref}>
       <Link href={`/blog/${post.slug}`} className="group block h-full">
         <div className="h-full bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-[#29ABE2]/30 hover:shadow-lg transition-all duration-300 flex flex-col">
-          <div className="relative aspect-video overflow-hidden bg-gray-100">
+          <div className="relative aspect-4/3 overflow-hidden bg-gray-100">
             {post.imatge_url && (
-              <Image src={post.imatge_url} alt={post.titol} fill className="object-contain transition-transform duration-500 group-hover:scale-105 group-hover:brightness-90" sizes="(max-width: 768px) 100vw, 33vw" />
+              <Image src={post.imatge_url} alt={post.titol} fill className="object-cover object-[center_30%] transition-transform duration-500 group-hover:scale-105" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
             )}
+            <PhotoCount post={post} t={t} />
           </div>
           <div className="flex flex-col flex-1 p-5">
             <div className="flex items-center gap-2 mb-3">
@@ -145,7 +168,7 @@ function PostCard({ post, index, locale }: { post: Post; index: number; locale: 
 function PostSkeleton({ index }: { index: number }) {
   return (
     <div key={index} className="rounded-xl overflow-hidden border border-gray-100 animate-pulse">
-      <div className="aspect-video bg-gray-200" />
+      <div className="aspect-4/3 bg-gray-200" />
       <div className="p-5 flex flex-col gap-3">
         <div className="h-2 bg-gray-200 rounded w-1/4" />
         <div className="h-4 bg-gray-200 rounded w-3/4" />
@@ -205,7 +228,7 @@ export default function BlogPage() {
         {loading && (
           <>
             <div className="mb-10 rounded-xl overflow-hidden border border-gray-100 animate-pulse grid md:grid-cols-2">
-              <div className="aspect-video md:aspect-auto md:min-h-[340px] bg-gray-200" />
+              <div className="aspect-4/3 md:aspect-auto md:min-h-85 bg-gray-200" />
               <div className="p-10 flex flex-col gap-4">
                 <div className="h-3 bg-gray-200 rounded w-1/4" />
                 <div className="h-6 bg-gray-200 rounded w-3/4" />
@@ -228,7 +251,7 @@ export default function BlogPage() {
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {otherPosts.map((post, i) => (
-                <PostCard key={post.id} post={localizePost(post, locale)} index={i} locale={locale} />
+                <PostCard key={post.id} post={localizePost(post, locale)} index={i} locale={locale} t={t} />
               ))}
             </div>
           </>
