@@ -11,6 +11,8 @@
 export interface Sponsor {
   name: string
   logo: string
+  /** Patrocinadors principals: 'xl' el més destacat, 'lg' el següent. */
+  size?: 'lg' | 'xl'
 }
 
 export interface SponsorGroup {
@@ -35,7 +37,7 @@ export interface SponsorLaterals {
  */
 const CAPO_LATERALS: SponsorLaterals = {
   left: [
-    { name: 'Can Pérez Restaurant', logo: `${CAPO_PATROCINADORS_DIR}/can-perez.jpg` },
+    { name: 'Can Pérez Restaurant', logo: `${CAPO_PATROCINADORS_DIR}/can-perez.jpg`, size: 'xl' },
     { name: 'Altarum', logo: `${CAPO_PATROCINADORS_DIR}/altarum.png` },
     { name: 'Carnisseries Soler', logo: `${CAPO_PATROCINADORS_DIR}/carnisseries-soler.png` },
     { name: 'Premium Energy', logo: `${CAPO_PATROCINADORS_DIR}/premium-energy.png` },
@@ -43,7 +45,7 @@ const CAPO_LATERALS: SponsorLaterals = {
     { name: 'SimaGol9', logo: `${CAPO_PATROCINADORS_DIR}/simagol9.png` },
   ],
   right: [
-    { name: 'Tecnocasa', logo: `${CAPO_PATROCINADORS_DIR}/tecnocasa.jpg` },
+    { name: 'Tecnocasa', logo: `${CAPO_PATROCINADORS_DIR}/tecnocasa.jpg`, size: 'lg' },
     { name: 'Banca Mediolanum', logo: `${CAPO_PATROCINADORS_DIR}/banca-mediolanum.webp` },
     { name: 'Filsa', logo: `${CAPO_PATROCINADORS_DIR}/filsa.jpg` },
     { name: 'Ametller Origen', logo: `${CAPO_PATROCINADORS_DIR}/ametller-origen.png` },

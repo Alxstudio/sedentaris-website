@@ -63,6 +63,20 @@ function DataItem({ label, value }: { label: string; value: string }) {
   )
 }
 
+type LogoSize = NonNullable<Sponsor['size']> | 'base'
+
+const BLOCK_LOGO_SIZE: Record<LogoSize, string> = {
+  base: 'h-14 w-32',
+  lg: 'h-20 w-44',
+  xl: 'h-24 w-56',
+}
+
+const SIDEBAR_LOGO_SIZE: Record<LogoSize, string> = {
+  base: 'h-20 w-40',
+  lg: 'h-24 w-48',
+  xl: 'h-28 w-56',
+}
+
 function SponsorBlock({ group, label, className = '' }: { group: SponsorGroup; label: string; className?: string }) {
   return (
     <div className={`mb-10 ${className}`}>
@@ -71,8 +85,8 @@ function SponsorBlock({ group, label, className = '' }: { group: SponsorGroup; l
       </p>
       <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-5">
         {group.sponsors.map((s) => (
-          <div key={s.name} className="relative h-14 w-32 shrink-0">
-            <Image src={s.logo} alt={s.name} fill className="object-contain" sizes="128px" />
+          <div key={s.name} className={`relative shrink-0 ${BLOCK_LOGO_SIZE[s.size ?? 'base']}`}>
+            <Image src={s.logo} alt={s.name} fill className="object-contain" sizes="224px" />
           </div>
         ))}
       </div>
@@ -85,8 +99,8 @@ function SponsorSidebar({ sponsors, label }: { sponsors: Sponsor[]; label: strin
     <aside aria-label={label} className="hidden xl:block">
       <div className="sticky top-24 flex flex-col items-center gap-8 py-16">
         {sponsors.map((s) => (
-          <div key={s.name} className="relative h-20 w-40">
-            <Image src={s.logo} alt={s.name} fill className="object-contain" sizes="160px" />
+          <div key={s.name} className={`relative ${SIDEBAR_LOGO_SIZE[s.size ?? 'base']}`}>
+            <Image src={s.logo} alt={s.name} fill className="object-contain" sizes="224px" />
           </div>
         ))}
       </div>
@@ -147,7 +161,7 @@ export default function CursaPage({ cursa }: { cursa: CursaId }) {
       <div
         className={
           laterals
-            ? 'xl:max-w-340 xl:mx-auto xl:grid xl:grid-cols-[192px_minmax(0,1fr)_192px]'
+            ? 'xl:max-w-340 xl:mx-auto xl:grid xl:grid-cols-[224px_minmax(0,1fr)_224px]'
             : undefined
         }
       >
