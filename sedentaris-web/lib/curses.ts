@@ -162,11 +162,10 @@ export const CURSA_SPONSORS: Record<'capo' | 'canicross', SponsorGroup[]> = {
 }
 
 /**
- * Imatge destacada de cada cursa. Les dues acaben al Castell de Castelldefels
- * —el Capó, de fet, hi puja—, així que comparteixen la mateixa foto i el
- * fitxer viu fora de les carpetes de cada cursa.
+ * Imatge destacada de cada cursa. El Capó fa servir el logo de l'edició 2026;
+ * el canicross, la foto del Castell de Castelldefels, on surt i arriba.
  */
 export const CURSA_HERO: Record<'capo' | 'canicross', string> = {
-  capo: '/curses/castell.png',
+  capo: `${CAPO_DIR}/logo-capo-2026.png`,
   canicross: '/curses/castell.png',
 }
