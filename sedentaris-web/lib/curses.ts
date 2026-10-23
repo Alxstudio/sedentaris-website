@@ -44,6 +44,7 @@ const CAPO_LATERALS: SponsorLaterals = {
   ],
   right: [
     { name: 'Tecnocasa', logo: `${CAPO_PATROCINADORS_DIR}/tecnocasa.jpg` },
+    { name: 'Banca Mediolanum', logo: `${CAPO_PATROCINADORS_DIR}/banca-mediolanum.webp` },
     { name: 'Filsa', logo: `${CAPO_PATROCINADORS_DIR}/filsa.jpg` },
     { name: 'Ametller Origen', logo: `${CAPO_PATROCINADORS_DIR}/ametller-origen.png` },
     { name: 'Espai Bike Castelldefels', logo: `${CAPO_PATROCINADORS_DIR}/espai-bike.jpg` },
