@@ -5,7 +5,14 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useT } from '@/lib/i18n'
-import { CURSA_HERO, CURSA_SPONSORS, type SponsorGroup } from '@/lib/curses'
+import {
+  CURSA_EDICIO_PUBLICADA,
+  CURSA_HERO,
+  CURSA_LATERALS,
+  CURSA_SPONSORS,
+  type Sponsor,
+  type SponsorGroup,
+} from '@/lib/curses'
 
 function useReveal(delay = 0) {
   const ref = useRef<HTMLDivElement>(null)
@@ -54,9 +61,9 @@ function DataItem({ label, value }: { label: string; value: string }) {
   )
 }
 
-function SponsorBlock({ group, label }: { group: SponsorGroup; label: string }) {
+function SponsorBlock({ group, label, className = '' }: { group: SponsorGroup; label: string; className?: string }) {
   return (
-    <div className="mb-10">
+    <div className={`mb-10 ${className}`}>
       <p className="text-[10px] font-semibold tracking-[3px] uppercase text-gray-400 mb-5 text-center">
         {label}
       </p>
@@ -68,6 +75,20 @@ function SponsorBlock({ group, label }: { group: SponsorGroup; label: string }) 
         ))}
       </div>
     </div>
+  )
+}
+
+function SponsorSidebar({ sponsors, label }: { sponsors: Sponsor[]; label: string }) {
+  return (
+    <aside aria-label={label} className="hidden xl:block">
+      <div className="sticky top-24 flex flex-col items-center gap-8 py-16">
+        {sponsors.map((s) => (
+          <div key={s.name} className="relative h-20 w-40">
+            <Image src={s.logo} alt={s.name} fill className="object-contain" sizes="160px" />
+          </div>
+        ))}
+      </div>
+    </aside>
   )
 }
 
@@ -86,6 +107,8 @@ export default function CursaPage({ cursa }: { cursa: CursaId }) {
 
   const hero = CURSA_HERO[cursa]
   const sponsorGroups = CURSA_SPONSORS[cursa]
+  const laterals = CURSA_LATERALS[cursa]
+  const edicioPublicada = CURSA_EDICIO_PUBLICADA[cursa]
   const blocLabels: Record<SponsorGroup['key'], string> = {
     organitzacio: g.blocOrganitzacio,
     collaboradors: g.blocCollaboradors,
@@ -117,7 +140,15 @@ export default function CursaPage({ cursa }: { cursa: CursaId }) {
         </div>
       </section>
 
-      <section className="max-w-4xl mx-auto px-4 sm:px-8 py-10 sm:py-16">
+      <div
+        className={
+          laterals
+            ? 'xl:max-w-340 xl:mx-auto xl:grid xl:grid-cols-[192px_minmax(0,1fr)_192px]'
+            : undefined
+        }
+      >
+      {laterals && <SponsorSidebar sponsors={laterals.left} label={g.blocPatrocinadors} />}
+      <section className="max-w-4xl w-full mx-auto px-4 sm:px-8 py-10 sm:py-16">
 
         {/* Presentació */}
         <div ref={introRef} className="mb-12">
@@ -141,6 +172,7 @@ export default function CursaPage({ cursa }: { cursa: CursaId }) {
         <div ref={bodyRef}>
           {/* Dades ràpides */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-12">
+            {edicioPublicada && 'data' in c && <DataItem label={g.dataLabel} value={c.data} />}
             <DataItem label={g.distanciaLabel} value={c.distancia} />
             {'desnivell' in c && <DataItem label={g.desnivellLabel} value={c.desnivell} />}
             <DataItem label={g.sortidaLabel} value={c.sortida} />
@@ -149,9 +181,11 @@ export default function CursaPage({ cursa }: { cursa: CursaId }) {
           </div>
 
           {/* Avís d'edició */}
-          <p className="mb-12 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg px-5 py-4">
-            {g.lastEditionNotice}
-          </p>
+          {!edicioPublicada && (
+            <p className="mb-12 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg px-5 py-4">
+              {g.lastEditionNotice}
+            </p>
+          )}
 
           {/* Recorregut */}
           <div className="mb-12">
@@ -212,12 +246,20 @@ export default function CursaPage({ cursa }: { cursa: CursaId }) {
           </div>
         </div>
       </section>
+      {laterals && <SponsorSidebar sponsors={laterals.right} label={g.blocPatrocinadors} />}
+      </div>
 
       {/* Patrocinadors de la cursa */}
       <section className="border-t border-gray-200 bg-gray-50/60">
         <div ref={sponsorsRef} className="max-w-5xl mx-auto px-4 sm:px-8 py-12">
           {sponsorGroups.map((group) => (
-            <SponsorBlock key={group.key} group={group} label={blocLabels[group.key]} />
+            <SponsorBlock
+              key={group.key}
+              group={group}
+              label={blocLabels[group.key]}
+              // Amb laterals, els patrocinadors només es repeteixen aquí quan no hi caben.
+              className={laterals && group.key === 'patrocinadors' ? 'xl:hidden' : ''}
+            />
           ))}
         </div>
       </section>

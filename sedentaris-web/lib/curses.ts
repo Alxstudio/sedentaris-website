@@ -1,8 +1,9 @@
 /**
  * Patrocinadors de les curses, recuperats de la web WordPress anterior.
  *
- * L'ordre i l'agrupació són els de l'original. Falten DK90 i Analoga (capó)
- * i Forn Pepi (canicross): els seus logos es van pujar al WordPress després
+ * L'ordre i l'agrupació són els de l'original, excepte els patrocinadors del
+ * capó, que són els de l'edició 2026 (vegeu CAPO_LATERALS). Falta Forn Pepi
+ * (canicross): el seu logo es va pujar al WordPress després
  * de l'últim rastreig d'archive.org i el domini ja no serveix /wp-content,
  * així que no són recuperables. Si algun dia arriben els fitxers, es deixen
  * a public/curses/<cursa>/ i s'afegeix l'entrada aquí.
@@ -20,6 +21,57 @@ export interface SponsorGroup {
 
 const CAPO_DIR = '/curses/capo'
 const CANI_DIR = '/curses/canicross'
+const CAPO_PATROCINADORS_DIR = `${CAPO_DIR}/patrocinadors`
+
+export interface SponsorLaterals {
+  left: Sponsor[]
+  right: Sponsor[]
+}
+
+/**
+ * Patrocinadors de l'edició 2026 del Capó, que van als laterals de la pàgina.
+ * L'ordre és el del PDF que va passar l'organització. Per afegir-ne un de nou
+ * es deixa el logo a public/curses/capo/patrocinadors/ i s'afegeix a la columna.
+ */
+const CAPO_LATERALS: SponsorLaterals = {
+  left: [
+    { name: 'Can Pérez Restaurant', logo: `${CAPO_PATROCINADORS_DIR}/can-perez.jpg` },
+    { name: 'Altarum', logo: `${CAPO_PATROCINADORS_DIR}/altarum.png` },
+    { name: 'Carnisseries Soler', logo: `${CAPO_PATROCINADORS_DIR}/carnisseries-soler.png` },
+    { name: 'Premium Energy', logo: `${CAPO_PATROCINADORS_DIR}/premium-energy.png` },
+    { name: 'Connecta Baix', logo: `${CAPO_PATROCINADORS_DIR}/connecta-baix.jpg` },
+    { name: 'SimaGol9', logo: `${CAPO_PATROCINADORS_DIR}/simagol9.png` },
+  ],
+  right: [
+    { name: 'Tecnocasa', logo: `${CAPO_PATROCINADORS_DIR}/tecnocasa.jpg` },
+    { name: 'Filsa', logo: `${CAPO_PATROCINADORS_DIR}/filsa.jpg` },
+    { name: 'Ametller Origen', logo: `${CAPO_PATROCINADORS_DIR}/ametller-origen.png` },
+    { name: 'Espai Bike Castelldefels', logo: `${CAPO_PATROCINADORS_DIR}/espai-bike.jpg` },
+    { name: 'Bureau Vallée Castelldefels', logo: `${CAPO_PATROCINADORS_DIR}/bureau-vallee.jpg` },
+  ],
+}
+
+function interleave<T>(a: T[], b: T[]): T[] {
+  const out: T[] = []
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    if (i < a.length) out.push(a[i])
+    if (i < b.length) out.push(b[i])
+  }
+  return out
+}
+
+export const CURSA_LATERALS: Partial<Record<'capo' | 'canicross', SponsorLaterals>> = {
+  capo: CAPO_LATERALS,
+}
+
+/**
+ * Curses amb la propera edició ja publicada: mostren la data i amaguen
+ * l'avís que la informació és de l'última edició celebrada.
+ */
+export const CURSA_EDICIO_PUBLICADA: Record<'capo' | 'canicross', boolean> = {
+  capo: true,
+  canicross: false,
+}
 
 export const CURSA_SPONSORS: Record<'capo' | 'canicross', SponsorGroup[]> = {
   capo: [
@@ -39,28 +91,9 @@ export const CURSA_SPONSORS: Record<'capo' | 'canicross', SponsorGroup[]> = {
     },
     {
       key: 'patrocinadors',
-      sponsors: [
-        // Reaprofitem els logos que ja té el club al footer.
-        // A l'original el fitxer es deia "self.jpg", però el patrocinador és Seif.
-        { name: 'Seif', logo: '/patrocinadores/seif.webp' },
-        { name: 'Filsa', logo: '/patrocinadores/filsa.webp' },
-        { name: 'Anec Blau', logo: '/patrocinadores/anecblau.webp' },
-        { name: 'Dispool', logo: `${CAPO_DIR}/dispool.jpg` },
-        { name: 'Carnisseries Soler', logo: `${CAPO_DIR}/carnisseries-soler.png` },
-        { name: 'GMRI', logo: `${CAPO_DIR}/gmri.png` },
-        { name: 'Premium Energy', logo: `${CAPO_DIR}/premium-energy.png` },
-        { name: 'ATope Sports', logo: `${CAPO_DIR}/atope-sport.png` },
-        { name: 'Bureau', logo: `${CAPO_DIR}/bureau.jpg` },
-        { name: 'Eurofitness', logo: `${CAPO_DIR}/eurofitness.png` },
-        { name: 'Ferreteria Mella', logo: `${CAPO_DIR}/ferreteria-mella.jpg` },
-        { name: 'Soria Natural', logo: `${CAPO_DIR}/soria-natural.png` },
-        { name: 'Santiveri', logo: `${CAPO_DIR}/santiveri.jpg` },
-        { name: 'Ametller', logo: `${CAPO_DIR}/ametller.png` },
-        { name: 'Espai Bike', logo: `${CAPO_DIR}/espaibike.jpg` },
-        { name: 'Connecta Baix', logo: `${CAPO_DIR}/connecta-baix.jpg` },
-        { name: 'Beet It Sport', logo: `${CAPO_DIR}/beet-it-sport.webp` },
-        { name: 'Simagol9', logo: '/patrocinadores/simagol9.webp' },
-      ],
+      // En pantalles petites no hi ha laterals: es mostren aquí, fila a fila
+      // en el mateix ordre que als laterals (esquerra, dreta, esquerra…).
+      sponsors: interleave(CAPO_LATERALS.left, CAPO_LATERALS.right),
     },
   ],
   canicross: [
