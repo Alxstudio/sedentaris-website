@@ -65,6 +65,19 @@ export const CURSA_LATERALS: Partial<Record<'capo' | 'canicross', SponsorLateral
 }
 
 /**
+ * Ruta de Wikiloc de cada cursa, que es mostra com a mapa interactiu al
+ * recorregut. Si canvia el circuit, n'hi ha prou de canviar l'URL: l'id del
+ * mapa és el número del final.
+ */
+export const CURSA_WIKILOC: Partial<Record<'capo' | 'canicross', string>> = {
+  capo: 'https://www.wikiloc.com/running-trails/cursa-el-capo-puja-al-castell-241820217',
+}
+
+export function wikilocId(url: string): string | undefined {
+  return url.match(/(\d+)\/?$/)?.[1]
+}
+
+/**
  * Curses amb la propera edició ja publicada: mostren la data i amaguen
  * l'avís que la informació és de l'última edició celebrada.
  */

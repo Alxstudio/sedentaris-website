@@ -10,6 +10,8 @@ import {
   CURSA_HERO,
   CURSA_LATERALS,
   CURSA_SPONSORS,
+  CURSA_WIKILOC,
+  wikilocId,
   type Sponsor,
   type SponsorGroup,
 } from '@/lib/curses'
@@ -109,6 +111,8 @@ export default function CursaPage({ cursa }: { cursa: CursaId }) {
   const sponsorGroups = CURSA_SPONSORS[cursa]
   const laterals = CURSA_LATERALS[cursa]
   const edicioPublicada = CURSA_EDICIO_PUBLICADA[cursa]
+  const wikilocUrl = CURSA_WIKILOC[cursa]
+  const wikiloc = wikilocUrl && wikilocId(wikilocUrl)
   const blocLabels: Record<SponsorGroup['key'], string> = {
     organitzacio: g.blocOrganitzacio,
     collaboradors: g.blocCollaboradors,
@@ -194,6 +198,24 @@ export default function CursaPage({ cursa }: { cursa: CursaId }) {
               <p>{c.recorregut1}</p>
               <p>{c.recorregut2}</p>
             </div>
+            {wikiloc && (
+              <div className="mt-6">
+                <iframe
+                  src={`https://www.wikiloc.com/wikiloc/embedv2.do?id=${wikiloc}&elevation=on&images=off&maptype=H`}
+                  title={`${g.recorregutTitle} · Wikiloc`}
+                  loading="lazy"
+                  className="w-full h-105 sm:h-125 rounded-lg border border-gray-200"
+                />
+                <a
+                  href={wikilocUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block mt-2 text-xs text-gray-400 hover:text-[#29ABE2] transition-colors"
+                >
+                  Wikiloc ↗
+                </a>
+              </div>
+            )}
           </div>
 
           {/* Horaris */}
