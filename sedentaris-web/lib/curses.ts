@@ -43,6 +43,7 @@ const CAPO_LATERALS: SponsorLaterals = {
     { name: 'Premium Energy', logo: `${CAPO_PATROCINADORS_DIR}/premium-energy.png` },
     { name: 'Connecta Baix', logo: `${CAPO_PATROCINADORS_DIR}/connecta-baix.jpg` },
     { name: 'SimaGol9', logo: `${CAPO_PATROCINADORS_DIR}/simagol9.png` },
+    { name: 'Ferretería Mella', logo: `${CAPO_PATROCINADORS_DIR}/ferreteria-mella.jpg` },
   ],
   right: [
     { name: 'Tecnocasa', logo: `${CAPO_PATROCINADORS_DIR}/tecnocasa.jpg`, size: 'lg' },
@@ -51,6 +52,7 @@ const CAPO_LATERALS: SponsorLaterals = {
     { name: 'Ametller Origen', logo: `${CAPO_PATROCINADORS_DIR}/ametller-origen.png` },
     { name: 'Espai Bike Castelldefels', logo: `${CAPO_PATROCINADORS_DIR}/espai-bike.jpg` },
     { name: 'Bureau Vallée Castelldefels', logo: `${CAPO_PATROCINADORS_DIR}/bureau-vallee.jpg` },
+    { name: 'DK-90', logo: `${CAPO_PATROCINADORS_DIR}/dk-90.png` },
   ],
 }
 
