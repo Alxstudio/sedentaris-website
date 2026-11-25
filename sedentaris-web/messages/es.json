@@ -17,6 +17,11 @@
     "ariaLangCa": "Veure aquesta pàgina en català",
     "ariaLangEs": "Ver esta página en español"
   },
+  "home": {
+    "capoTag": "Próxima carrera",
+    "capoCta": "Más info",
+    "ariaCapo": "El Capó Puja al Castell: información e inscripciones de la carrera"
+  },
   "footer": {
     "collaboradors": "Colaboradores y Patrocinadores",
     "rights": "Todos los derechos reservados",
